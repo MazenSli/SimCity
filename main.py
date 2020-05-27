@@ -1,13 +1,24 @@
+#
+# main.py
+#
+#
+
+from builtins import Exception
 import optparse
 import sys
-from builtins import Exception
+from modules.Intersection import Intersection
+from modules.Street import Street
 
 
-class Test:
+class TestModule:
+    """
+    # base class for all traffic elements
+    """
+
     # constructor
     def __init__(self):
         pass
-     
+
     # string representation for class data
     def __str__(self):
         pass
@@ -33,6 +44,15 @@ def main(argv=None):
         #validate options
         if options.inputFileName is None:
             raise Exception("Must specify input file name using -i or --input option.")
+
+        Inter1 = Intersection()
+        Inter2 = Intersection()
+        Inter3 = Intersection()
+        Inter4 = Intersection()
+        Street1 = Street()
+        Street2 = Street()
+        Street3 = Street()
+        Street4 = Street()
 
         if not options.quietMode:                    
             print('Main Completed!')
