@@ -1,12 +1,12 @@
 #
-# Street.py
+# IntersectionBlock.py
 #
 #
 
 
-class Street:
+class IntersectionBlock(Block):
     #
-    # Street class
+    # Lane class
     #
 
     # constructor
