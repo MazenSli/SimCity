@@ -6,6 +6,7 @@
 from builtins import Exception
 import optparse
 import sys
+from modules.Block import Block
 from modules.Intersection import Intersection
 from modules.Street import Street
 from random import randrange
@@ -18,11 +19,17 @@ def createMap(intersections):
     for d in range(len(intersections)):
         dict_inter[intersections[d]] = ['north', 'east', 'south', 'west']
 
-    names = ['Dunhua Rd.', 'Fuxing Rd.', 'Guangfu Rd.', 'Heping Rd.',
-             'Keelung Rd.', 'Roosevelt Rd.', 'Xinsheng Rd.', 'Xinyi Rd.',
-             'Zhongshan Rd', 'Zhongxiao Rd.', 'Anping Old St.',
-             'Ciaonan St.', 'Xinhua Old St.', 'Fukang St.', 'Hou St.',
-             'Huagang Rd.', 'Jingfeng St.']
+#    names = ['Dunhua Rd.', 'Fuxing Rd.', 'Guangfu Rd.', 'Heping Rd.',
+#             'Keelung Rd.', 'Roosevelt Rd.', 'Xinsheng Rd.', 'Xinyi Rd.',
+#             'Zhongshan Rd', 'Zhongxiao Rd.', 'Anping Old St.',
+#             'Ciaonan St.', 'Xinhua Old St.', 'Fukang St.', 'Hou St.',
+#             'Huagang Rd.', 'Jingfeng St.']
+
+    names = ['A', 'B', 'C', 'D',
+             'E', 'F', 'G', 'H',
+             'I', 'J', 'K',
+             'L', 'M', 'N', 'O',
+             'P', 'Q']
 
     # Create and add streets
     for i in range(len(intersections)):
@@ -57,10 +64,15 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
 
-        I1 = Intersection(name='Shilin')
-        I2 = Intersection(name='Zhongshan')
-        I3 = Intersection(name='Beimen')
-        I4 = Intersection(name='Longshan')
+#        I1 = Intersection(name='Shilin')
+#        I2 = Intersection(name='Zhongshan')
+#        I3 = Intersection(name='Beimen')
+#        I4 = Intersection(name='Longshan')
+
+        I1 = Intersection(name='1')
+        I2 = Intersection(name='2')
+        I3 = Intersection(name='3')
+        I4 = Intersection(name='4')
 
         streets = createMap([I1, I2, I3, I4])
 

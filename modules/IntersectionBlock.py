@@ -2,6 +2,7 @@
 # IntersectionBlock.py
 #
 #
+from modules.Block import Block
 
 
 class IntersectionBlock(Block):
