@@ -12,9 +12,13 @@ class Block:
     # constructor
     def __init__(self):
         super().__init__()
-
-        this.hasCar = False
+        self.hasCar = False
+        self.nextBlock = None
 
     # string representation for class data
     def __str__(self):
-        pass
+        return self.name
+
+    def set_nextBlock(self, block):         # todo: will be called from lane (?)
+        self.nextBlock = block
+

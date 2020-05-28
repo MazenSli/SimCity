@@ -12,6 +12,12 @@ class IntersectionBlock(Block):
     # constructor
     def __init__(self):
         super().__init__()
+        self.nextBlock = None
+
+    def set_nextBlock(self, nextBlocks):    # this will be called from Intersection
+        self.nextBlock = nextBlocks
+
+
 
     # string representation for class data
     def __str__(self):
