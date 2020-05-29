@@ -81,7 +81,15 @@ def main(argv=None):
 
         for s in streets:
             print(s)
-    
+
+        for i in [I1, I2, I3, I4]:
+            print(i)
+            for street in i.streets:
+                print(street)
+                for lane in street.lanes:
+                    print(lane)
+
+
 
 if __name__ == '__main__':
     main()

@@ -10,11 +10,12 @@ class Block:
     #
 
     # constructor
-    def __init__(self):
+    def __init__(self, blockType='intermediate', relatedIntersection_name=None):
         super().__init__()
         self.hasCar = False
         self.nextBlock = None
-        self.nextBlockType = 'intermediate'
+        self.blockType = blockType
+        self.relatedIntersection_name = relatedIntersection_name
 
     # string representation for class data
     def __str__(self):
@@ -22,4 +23,3 @@ class Block:
 
     def set_nextBlock(self, block):         # will be called from lane
         self.nextBlock = block
-

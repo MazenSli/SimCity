@@ -17,8 +17,8 @@ class Street:
         self.startInter = startIs
         self.endInter = endIs
         # Lane[1] will be "facing" the opposite way of the street/Lane[0]
-        self.lanes = [Lane(self.length, startIntersection=startIs, endIntersection=endIs),
-                      Lane(self.length, startIntersection=endIs, endIntersection=startIs)]
+        self.lanes = [Lane(self.length, startIntersection=endIs, endIntersection=startIs),
+                      Lane(self.length, startIntersection=startIs, endIntersection=endIs)]
         if name is not None:
             setattr(self, 'name', name)
 

@@ -11,11 +11,11 @@ class IntersectionBlock(Block):
     #
 
     # constructor
-    def __init__(self):
-        super().__init__()
+    def __init__(self, blockType='intermediate', relatedIntersection_name=None):
+        super().__init__(blockType, relatedIntersection_name)
         self.nextBlock = None
 
-    def set_nextBlock(self, nextBlocks):    # this will be called from Intersection
+    def set_nextBlock(self, nextBlocks):    # 'nextBlocks' will be a dictionary wit 'left', 'right', and 'straight'
         self.nextBlock = nextBlocks
 
 
