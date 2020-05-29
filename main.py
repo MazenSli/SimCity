@@ -6,22 +6,55 @@
 from builtins import Exception
 import optparse
 import sys
+from modules.Block import Block
 from modules.Intersection import Intersection
 from modules.Street import Street
+from random import randrange
 
 
-class TestModule:
-    """
-    # base class for all traffic elements
-    """
+def createMap(intersections):
+    streets = []
+    dict_inter = {}
 
-    # constructor
-    def __init__(self):
-        pass
+    for d in range(len(intersections)):
+        dict_inter[intersections[d]] = ['north', 'east', 'south', 'west']
 
-    # string representation for class data
-    def __str__(self):
-        pass
+#    names = ['Dunhua Rd.', 'Fuxing Rd.', 'Guangfu Rd.', 'Heping Rd.',
+#             'Keelung Rd.', 'Roosevelt Rd.', 'Xinsheng Rd.', 'Xinyi Rd.',
+#             'Zhongshan Rd', 'Zhongxiao Rd.', 'Anping Old St.',
+#             'Ciaonan St.', 'Xinhua Old St.', 'Fukang St.', 'Hou St.',
+#             'Huagang Rd.', 'Jingfeng St.']
+
+    names = ['A', 'B', 'C', 'D',
+             'E', 'F', 'G', 'H',
+             'I', 'J', 'K',
+             'L', 'M', 'N', 'O',
+             'P', 'Q']
+
+    # Create and add streets
+    for i in range(len(intersections)):
+        inter1 = intersections.pop(randrange(len(intersections)))
+
+        if len(intersections) == 0:
+            break
+
+        while len(dict_inter[inter1]) > 0:
+            inter1_dir_nr = randrange(len(dict_inter[inter1]))
+            inter1_dir = dict_inter[inter1].pop(inter1_dir_nr)
+
+            inter2_nr = randrange(len(intersections))
+            inter2 = intersections[inter2_nr]
+            inter2_dir_nr = randrange(len(dict_inter[inter2]))
+            inter2_dir = dict_inter[inter2].pop(inter2_dir_nr)
+
+            length = randrange(4, 12)
+            name = names.pop(randrange(len(names)))
+
+            streets.append(Street(length=length, startIs=inter1, endIs=inter2, name=name))
+            inter1.addStreet(street=streets[-1], direction=inter1_dir)
+            inter2.addStreet(street=streets[-1], direction=inter2_dir)
+
+    return streets
 
 
 #
@@ -30,40 +63,33 @@ class TestModule:
 def main(argv=None):
     if argv is None:
         argv = sys.argv
-        
-    try:
-        #
-        # get command-line options
-        #
-        parser = optparse.OptionParser()
-        parser.add_option("-i", "--input", action="store", dest="inputFileName", help="input filename", default=None)
-        parser.add_option("-q", "--quiet", action="store_true", dest="quietMode", help="quiet mode", default=False)
-        parser.add_option("-d", "--debug", action="store_true", dest="debugMode", help="debug mode", default=False)
-        (options, args) = parser.parse_args(argv)
-        
-        #validate options
-        if options.inputFileName is None:
-            raise Exception("Must specify input file name using -i or --input option.")
 
-        Inter1 = Intersection()
-        Inter2 = Intersection()
-        Inter3 = Intersection()
-        Inter4 = Intersection()
-        Street1 = Street()
-        Street2 = Street()
-        Street3 = Street()
-        Street4 = Street()
+#        I1 = Intersection(name='Shilin')
+#        I2 = Intersection(name='Zhongshan')
+#        I3 = Intersection(name='Beimen')
+#        I4 = Intersection(name='Longshan')
 
-        if not options.quietMode:                    
-            print('Main Completed!')
-    
-    except Exception as info:
-        if 'options' in vars() and options.debugMode:
-            from traceback import print_exc
-            print_exc()
-        else:
-            print(info)
-    
+        I1 = Intersection(name='1')
+        I2 = Intersection(name='2')
+        I3 = Intersection(name='3')
+        I4 = Intersection(name='4')
+
+        streets = createMap([I1, I2, I3, I4])
+
+        for i in [I1, I2, I3, I4]:
+            print(i)
+
+        for s in streets:
+            print(s)
+
+        for i in [I1, I2, I3, I4]:
+            print(i)
+            for street in i.streets:
+                print(street)
+                for lane in street.lanes:
+                    print(lane)
+
+
 
 if __name__ == '__main__':
     main()
