@@ -68,11 +68,6 @@ def createMap(intersections):
 def main(argv=None):
     if argv is None:
         argv = sys.argv
-
-        I1 = Intersection(name='Shilin')
-        I2 = Intersection(name='Zhongshan')
-        I3 = Intersection(name='Beimen')
-        I4 = Intersection(name='Longshan')
         
 #        I1 = Intersection(name='Shilin')
 #        I2 = Intersection(name='Zhongshan')
@@ -99,7 +94,6 @@ def main(argv=None):
                 print(street)
                 for lane in street.lanes:
                     print(lane)
-
 
 
 if __name__ == '__main__':
