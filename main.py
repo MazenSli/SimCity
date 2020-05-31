@@ -36,7 +36,12 @@ def createMap(intersections):
             inter1_dir = dict_inter[inter1].pop(inter1_dir_nr)
 
             inter2_nr = randrange(len(intersections))
+            # pick intersection with min streets to balance the map
+            for j in range(len(intersections)):
+                if len(intersections[inter2_nr]) > len(intersections[j]):
+                    inter2_nr = j
             inter2 = intersections[inter2_nr]
+
             inter2_dir_nr = randrange(len(dict_inter[inter2]))
             inter2_dir = dict_inter[inter2].pop(inter2_dir_nr)
 
@@ -61,10 +66,12 @@ def main(argv=None):
         I2 = Intersection(name='Zhongshan')
         I3 = Intersection(name='Beimen')
         I4 = Intersection(name='Longshan')
+        I5 = Intersection(name='Taipei Zoo')
 
-        streets = createMap([I1, I2, I3, I4])
+        streets = createMap([I1, I2, I3, I4, I5])
 
-        for i in [I1, I2, I3, I4]:
+        print('Map: ')
+        for i in [I1, I2, I3, I4, I5]:
             print(i)
 
         for s in streets:
