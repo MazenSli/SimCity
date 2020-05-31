@@ -81,13 +81,6 @@ def main(argv=None):
 
         streets = createMap([I1, I2, I3, I4])
 
-        print('Map: ')
-        for i in [I1, I2, I3, I4]:
-            print(i)
-
-        for s in streets:
-            print(s)
-
         for i in [I1, I2, I3, I4]:
             print(i)
             for street in i.streets:
