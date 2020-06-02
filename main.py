@@ -10,6 +10,7 @@ from modules.Block import Block
 from modules.Intersection import Intersection
 from modules.Street import Street
 from random import randrange
+from ea.ev3 import EV3_Config, ev3
 
 
 def createMap(intersections):
@@ -81,12 +82,23 @@ def main(argv=None):
 
         streets = createMap([I1, I2, I3, I4])
 
-        for i in [I1, I2, I3, I4]:
+        intersections = [I1, I2, I3, I4]
+
+        for i in intersections:
             print(i)
             for street in i.streets:
                 print(street)
                 for lane in street.lanes:
                     print(lane)
+
+        # Get EV3 config params
+        cfg = EV3_Config(intersections, 'ea/my_params.cfg')
+
+        # print config params
+        print(cfg)
+
+        # run EV3
+        ev3(cfg)
 
 
 if __name__ == '__main__':
