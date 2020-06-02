@@ -32,13 +32,3 @@ class Street:
             s += self.name + ', '
         s += 'contains ' + str(self.__len__()) + ' blocks.'
         return s
-
-#    def defineEnds(self):
-#        if self.lane[0].blocks[0].blocktype == 'intermediate':
-#            self.lane[0].blocks[0].set_BlockType('first')
-#        if self.lane[0].blocks[self.length-1].blocktype == 'intermediate':
-#            self.lane[0].blocks[self.length-1].set_BlockType('last')
-#        if self.lane[1].blocks[0].blocktype == 'intermediate':
-#            self.lane[1].blocks[0].set_BlockType('first')
-#        if self.lane[1].blocks[self.length-1].blocktype == 'intermediate':
-#            self.lane[1].blocks[self.length-1].set_BlockType('last')

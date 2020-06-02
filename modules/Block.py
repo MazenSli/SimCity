@@ -10,12 +10,12 @@ class Block:
     #
 
     # constructor
-    def __init__(self, blockType='intermediate', relatedIntersection_name=None):
+    def __init__(self, blockType='intermediate', relatedIntersection=None):
         super().__init__()
-        self.hasCar = False
+        self.hasCar = None  # this attribute will be either None or a Car object, todo: this has to be renamed, since the name implies a boolean...
         self.nextBlock = None
         self.blockType = blockType
-        self.relatedIntersection_name = relatedIntersection_name
+        self.relatedIntersection = relatedIntersection
 
     # string representation for class data
     def __str__(self):

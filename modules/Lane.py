@@ -29,9 +29,9 @@ class Lane:
     def __str__(self):
         retString = 'startInters: ' + str(self.startIntersection) + '   endInters: ' + str(self.endIntersection) + '\n'\
                     + 'first block of the lane is: ' + self.blocks[0].blockType\
-                    + ' with related Inters: ' + self.blocks[0].relatedIntersection_name + '\n'\
+                    + ' with related Inters: ' + str(self.blocks[0].relatedIntersection) + '\n'\
                     + 'last block of the lane is: ' + self.blocks[self.length-1].blockType\
-                    + ' with related Inters: ' + self.blocks[self.length-1].relatedIntersection_name + '\n'
+                    + ' with related Inters: ' + str(self.blocks[self.length-1].relatedIntersection) + '\n'
         return retString
 
     # exitBlock is the first block of a road -> the block that represents the exit of an intersection
