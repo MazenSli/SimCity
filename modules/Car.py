@@ -15,7 +15,7 @@ class Car:
     # constructor
     def __init__(self, position):
         super().__init__()
-        self.position = position
+        self.position = position  # block
         self.idleTime = 0
         self.nextTurn = 'straight'           # todo: 'left', 'straight', 'right'.
 
