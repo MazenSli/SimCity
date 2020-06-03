@@ -5,6 +5,10 @@
 
 from random import randrange
 from modules.Street import Street
+from modules.Car import Car
+from modules.Lane import Lane
+from modules.IntersectionBlock import IntersectionBlock
+from modules.Block import Block
 
 
 def createMap(intersections):
@@ -59,7 +63,15 @@ def createMap(intersections):
 
 def generateCars(intersections):
     # todo
+
     cars = []
+
+    for i in intersections:
+        for street in i.streets:
+            nCars = len(street)
+            for lane in street.lanes:
+                pass
+
     return cars
 
 
