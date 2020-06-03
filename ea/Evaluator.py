@@ -1,21 +1,14 @@
 import math
 
 
-# Multi-dimensional Rastrigrin function evaluator class
-#
-class Rastrigrin:
-    nVars = None
+class TrafficLightExp:
     A = None
 
     @classmethod
-    def fitnessFunc(cls, state):
-        fitness = cls.A * cls.nVars
+    def fitnessFunc(cls, idleTimes):
+        fitness = 0
 
-        for i in range(cls.nVars):
-            fitness += state[i] * state[i] - cls.A * math.cos(2.0 * math.pi * state[i])
+        for i in range(len(idleTimes)):
+            fitness += (1 / idleTimes[i])
 
-        return -fitness
-
-
-class TrafficLights:
-    pass
+        return fitness * cls.A

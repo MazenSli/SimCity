@@ -11,12 +11,12 @@
 #   - Supports IntegerVector and Multivariate Individual types
 #
 
-import optparse
-import sys
 import yaml
+
 from random import Random
 from ea.Population import *
 from ea.Evaluator import *
+from modules.MapFunctions import generateCars, simulateTraffic, setTrafficLightParameters
 
 
 # EV3 Config class
@@ -30,19 +30,21 @@ class EV3_Config:
                'generationCount': (int, True),
                'randomSeed': (int, True),
                'crossoverFraction': (float, True),
-               'rastrigrinA': (float, False),
-               'rastrigrinN': (int, False),
+               'trafficLightA': (float, False),
                'minLimit': (float, False),
                'maxLimit': (float, False)}
 
     # constructor
-    def __init__(self, intersections, inFileName):
+    def __init__(self, inFileName, nLength):
         # read YAML config and get EV3 section
         infile = open(inFileName, 'r')
         ymlcfg = yaml.safe_load(infile)
         infile.close()
         eccfg = ymlcfg.get(self.sectionName, None)
         if eccfg is None: raise Exception('Missing {} section in cfg file'.format(self.sectionName))
+
+        # number of traffic light parameters
+        self.nLength = nLength
 
         # iterate over options
         for opt in self.options:
@@ -87,7 +89,7 @@ def printStats(pop, gen):
 
 # EV3:
 #            
-def ev3(cfg):
+def ev3(cfg, intersections):
     # start random number generators
     uniprng = Random()
     uniprng.seed(cfg.randomSeed)
@@ -101,13 +103,12 @@ def ev3(cfg):
     Population.uniprng = uniprng
     Population.crossoverFraction = cfg.crossoverFraction
 
-    Rastrigrin.A = cfg.rastrigrinA
-    Rastrigrin.nVars = cfg.rastrigrinN
+    TrafficLightExp.A = cfg.trafficLightA
     MultivariateIndividual.minLimit = cfg.minLimit
     MultivariateIndividual.maxLimit = cfg.maxLimit
-    MultivariateIndividual.fitFunc = Rastrigrin.fitnessFunc
-    MultivariateIndividual.nLength = cfg.rastrigrinN
-    MultivariateIndividual.learningRate = 1.0 / math.sqrt(cfg.rastrigrinN)
+    MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
+    MultivariateIndividual.nLength = cfg.nLength
+    MultivariateIndividual.learningRate = 1.0 / math.sqrt(cfg.nLength)
     Population.individualType = MultivariateIndividual
 
     # create initial Population (random initialization)
@@ -118,6 +119,13 @@ def ev3(cfg):
 
     # evolution main loop
     for i in range(cfg.generationCount):
+
+        cars = generateCars(intersections)
+
+        for ind in population:
+            setTrafficLightParameters(intersections, ind.state)
+            simulateTraffic(intersections, cars)
+
         # create initial offspring population by copying parent pop
         offspring = population.copy()
 

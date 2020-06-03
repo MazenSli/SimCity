@@ -5,6 +5,9 @@
 import random
 from modules.IntersectionBlock import IntersectionBlock
 
+from modules.IntersectionBlock import IntersectionBlock
+
+
 class Car:
     #
     # Car class

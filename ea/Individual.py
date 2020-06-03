@@ -20,7 +20,7 @@ class Individual:
     fitFunc = None
 
     def __init__(self):
-        self.fit = self.__class__.fitFunc(self.state)
+        self.fit = self.__class__.fitFunc(self.idleTimes)
         self.mutRate = self.uniprng.uniform(0.9, 0.1)  # use "normalized" sigma
 
     def mutateMutRate(self):
@@ -29,7 +29,7 @@ class Individual:
         if self.mutRate > self.maxMutRate: self.mutRate = self.maxMutRate
 
     def evaluateFitness(self):
-        if self.fit == None: self.fit = self.__class__.fitFunc(self.state)
+        if self.fit == None: self.fit = self.__class__.fitFunc(self.idleTimes)
 
 
 # Multivariate real representation class
@@ -44,6 +44,7 @@ class MultivariateIndividual(Individual):
 
     def __init__(self):
         self.state = []
+        self.idleTimes = []
         for i in range(self.nLength):
             self.state.append(self.uniprng.uniform(self.minLimit, self.maxLimit))
 
