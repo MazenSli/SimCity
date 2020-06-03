@@ -3,6 +3,7 @@
 #
 #
 import random
+from modules.IntersectionBlock import IntersectionBlock
 
 class Car:
     #
@@ -17,43 +18,44 @@ class Car:
         super().__init__()
         self.position = position  # block
         self.idleTime = 0
-        self.nextTurn = 'straight'           # todo: 'left', 'straight', 'right'.
-
-    # string representation for class data
-    def __str__(self):
-        return self.name
+        self.nextTurn = 'straight'           # todo: 'left', 'straight', 'right'
 
     def set_nextTurn(self):
         randNum = random.random()
 
-        if randNum < turnLeftProb:
+        if randNum < self.turnLeftProb:
             self.nextTurn = 'left'
-        elif randNum > 1-turnRightProb:
+        elif randNum > 1-self.turnRightProb:
             self.nextTurn = 'right'
         else:
             self.nextTurn = 'straight'
 
-    '''def checkOppositeSide(self):
-        if self.position'''
+    def increment_idleTime(self):
+        self.idleTime += 1
+
+    def moveToNextBlock(self):
+        if type(self.position) == IntersectionBlock:
+            self.position = self.position.nextBlock[self.nextTurn]
+            self.position.nextBlock[self.nextTurn].set_car(self)
+        else:
+            self.position.nextBlock.set_car(self)
+            self.position = self.position.nextBlock
+
+        self.position.remove_car()
+
 
     # todo: what should happen if there is a car in front of the car? (That car might move as well in this timestamp,
     #  so there is not necessarily a need to stop)
     #  ANSWER: For now i'll stop the car as long as there is a car in next block
     #          (which is actually "realistic" and probably causing traffic jam and "reaction time" at traffic lights)
     #  -> high number for length of street will make things more smooth there. (can still adjust the time step duration)
-    def moveCar(self):         # will be called from lane
-
+    def moveCar(self):         # this function will only affect cars located at "non-intersectionBlocks"!
         if type(self.position) == IntersectionBlock:
-            # car is located at an intersection
-            self.position.relatedIntersection.processCars()
             return
+        # -> car is located at a normal block ("non-intersectionBlock")
 
-        # car won't move as long as there is another car in front of it
-        if self.position.nextBlock.hasCar():    # todo: hasCar = None functioniert wie 'False'?
+        if self.position.nextBlock.car():   # car won't move as long as there is another car in front of it
             self.idleTime += 1
             return
-
-
-        else:
-            # car is not located at an intersection
-            self.position = self.position.nextBlock()
+        else:                               # no car in nextBlock -> car can go
+            self.moveToNextBlock()
