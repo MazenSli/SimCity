@@ -16,22 +16,27 @@ class Intersection:
         if name is not None:
             setattr(self, 'name', name)
         self.streets = []
+        self.north_greenRatio = 0.5
+        self.intersectionTime = 60
+        self.toggleShift = 0  # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
+
         # intersectionEntryBlocks represent the end of a road and the entrance of an Intersection.
         # Those blocks are the only "IntersectionBlock" objects, they have to be special, because
         # they have more than one "nextBlock"
-        self.intersectionEntranceBlocks = {  # todo: if direction exists...
-            'north': IntersectionBlock(blockType='roadEnd', relatedIntersection_name=name),
-            'east': IntersectionBlock(blockType='roadEnd', relatedIntersection_name=name),
-            'south': IntersectionBlock(blockType='roadEnd', relatedIntersection_name=name),
-            'west': IntersectionBlock(blockType='roadEnd', relatedIntersection_name=name)
+        self.intersectionEntranceBlocks = {     # todo: if direction exists...
+                                                # todo: BlockType und relatedIntersection wurden zu testzwecken eingeführt und sind eventuell unnötig
+            'north': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self),
+            'east': IntersectionBlock(False, blockType='roadEnd', relatedIntersection=self),
+            'south': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self),
+            'west': IntersectionBlock(False, blockType='roadEnd', relatedIntersection=self)
         }
         # intersectionExitBlocks represent the entrance of a road and the exit of an Intersection.
         # They are normal "Block" objects
         self.intersectionExitBlocks = {  # todo: if direction exists...
-            'north': Block(blockType='roadEntrance', relatedIntersection_name=name),
-            'east': Block(blockType='roadEntrance', relatedIntersection_name=name),
-            'south': Block(blockType='roadEntrance', relatedIntersection_name=name),
-            'west': Block(blockType='roadEntrance', relatedIntersection_name=name)
+            'north': Block(blockType='roadEntrance', relatedIntersection=self),
+            'east': Block(blockType='roadEntrance', relatedIntersection=self),
+            'south': Block(blockType='roadEntrance', relatedIntersection=self),
+            'west': Block(blockType='roadEntrance', relatedIntersection=self)
         }
         self._init_intersectionBlocks()
 
@@ -73,6 +78,55 @@ class Intersection:
             self.streets.append(street)
             setattr(self, direction, street)
 
+    def set_greenRatio(self, north_greenRatio):     # todo: greenRatio von jew. diagonalen intersectionBlocks muss gleich sein, die restl. sind 1-greenRatio.
+            pass
+
+    def toggle_lights(self):
+        for direction, iBlock in self.intersectionEntranceBlocks.items():
+            iBlock.toggle_light()
+
+    def processCars(self,):     # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
+
+        for direction, iBlock in self.intersectionEntranceBlocks.items():
+            if not iBlock.car:  # entrancBlock has no car
+                continue
+            if not iBlock.isGreen:  # traffic light is red
+                iBlock.car.increment_idleTime()
+                continue
+            # traffic light is green
+            if iBlock.nextBlock[iBlock.car.nextTurn].car:  # nextBlock of entranceBlock is occupied
+                iBlock.car.increment_idleTime()
+                continue
+
+            # traffic light is green and there is no care in nextBlock
+            # ...now we want to turn left..
+            if iBlock.car.nextTurn == 'left':
+                if direction == 'north':
+                    if self.intersectionEntranceBlocks['south'].car:    # opposite side has a car
+                        if self.intersectionEntranceBlocks['south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                            iBlock.car.increment_idleTime()
+                            continue
+
+                elif direction == 'east':
+                    if self.intersectionEntranceBlocks['west'].car:     # opposite side has a car
+                        if self.intersectionEntranceBlocks['west'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                            iBlock.car.increment_idleTime()
+                            continue
+
+                elif direction == 'south':
+                    if self.intersectionEntranceBlocks['north'].car:    # opposite side has a car
+                        if self.intersectionEntranceBlocks['north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                            iBlock.car.increment_idleTime()
+                            continue
+
+                elif direction == 'west':
+                    if self.intersectionEntranceBlocks['east'].car:     # opposite side has a car
+                        if self.intersectionEntranceBlocks['north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                            iBlock.car.increment_idleTime()
+                            continue
+
+            # either we didn't intend to turn left or the opposite side didn't have a car or opposite car also turns left -> we can go
+            iBlock.car.moveToNextBlock()
 
     def checkDirection(self, direction):
         if hasattr(self, direction):
