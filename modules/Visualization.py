@@ -11,6 +11,7 @@ import random
 # 1920x1080
 time_per_frame = 0.016667  # seconds
 
+# todo: ERSTMAL MIT MASTER/ALGORITHM MERGEN, DANN VISU PROGRAMMIEREN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 class WindowWrapper:
     def __init__(self):
