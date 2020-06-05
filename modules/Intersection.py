@@ -4,7 +4,7 @@
 #
 from modules.Block import Block
 from modules.IntersectionBlock import IntersectionBlock
-
+from random import randrange
 
 class Intersection:
     #
@@ -12,56 +12,123 @@ class Intersection:
     #
 
     # constructor
-    def __init__(self, name=None):
+    def __init__(self, name=None, N_connections=4):
         if name is not None:
             setattr(self, 'name', name)
         self.streets = []
         self.north_greenRatio = 0.5
         self.intersectionTime = 60
+        self.N_connections = N_connections
+        self.directions = None
+        self.intersectionEntranceBlocks = None
+        self.intersectionExitBlocks = None
         self.toggleShift = 0  # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
 
-        # intersectionEntryBlocks represent the end of a road and the entrance of an Intersection.
-        # Those blocks are the only "IntersectionBlock" objects, they have to be special, because
-        # they have more than one "nextBlock"
-        self.intersectionEntranceBlocks = {     # todo: if direction exists...
-                                                # todo: BlockType und relatedIntersection wurden zu testzwecken eingeführt und sind eventuell unnötig
+        self._init_intersection_directions()
+        self._init_intersectionEntranceBlocks()
+        self._init_intersectionExitBlocks()
+        self._init_intersectionBlocks()
+    # sets up all the nextBlocks of the IntersectionBlocks (-> "intersectionEntranceBlocks"), the nextBlocks will be
+    # set in a dictionary with keys: left straight and right, representing the turns a car can perform at an inters.
+    def _init_intersection_directions(self):
+        directions = ['north', 'east', 'south', 'west']
+        if self.N_connections == 4:
+            self.directions = directions
+        elif self.N_connections == 3:
+            directions.pop(randrange(0, 4))
+            self.directions = directions
+
+    # intersectionEntryBlocks represent the end of a road and the entrance of an Intersection.
+    # Those blocks are the only "IntersectionBlock" objects, they have to be special, because
+    # they have more than one "nextBlock"
+    def _init_intersectionEntranceBlocks(self):
+        self.intersectionEntranceBlocks = {     # todo: BlockType und relatedIntersection wurden zu testzwecken eingeführt und sind eventuell unnötig
             'north': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self),
             'east': IntersectionBlock(False, blockType='roadEnd', relatedIntersection=self),
             'south': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self),
             'west': IntersectionBlock(False, blockType='roadEnd', relatedIntersection=self)
         }
-        # intersectionExitBlocks represent the entrance of a road and the exit of an Intersection.
-        # They are normal "Block" objects
+        if self.N_connections == 3:
+            missingDir = ['north', 'east', 'south', 'west']
+            # find missing direction
+            for direction in self.directions:
+                missingDir.remove(direction)  # todo: this object will be collected by garbage collection, right?
+            self.intersectionEntranceBlocks.pop(missingDir[0], None)
+
+    # intersectionExitBlocks represent the entrance of a road and the exit of an Intersection.
+    # They are normal "Block" objects
+    def _init_intersectionExitBlocks(self):
         self.intersectionExitBlocks = {  # todo: if direction exists...
             'north': Block(blockType='roadEntrance', relatedIntersection=self),
             'east': Block(blockType='roadEntrance', relatedIntersection=self),
             'south': Block(blockType='roadEntrance', relatedIntersection=self),
             'west': Block(blockType='roadEntrance', relatedIntersection=self)
         }
-        self._init_intersectionBlocks()
+        if self.N_connections == 3:
+            missingDir = ['north', 'east', 'south', 'west']
+            # find missing direction
+            for direction in self.directions:
+                missingDir.remove(direction)  # todo: this object will be collected by garbage collection, right?
+            self.intersectionExitBlocks[missingDir[0]] = None
 
-    # sets up all the nextBlocks of the IntersectionBlocks (-> "intersectionEntranceBlocks"), the nextBlocks will be
-    # set in a dictionary with keys: left straight and right, representing the turns a car can perform at an inters.
     def _init_intersectionBlocks(self):
+        # first find out which direction is missing, if we are in a 3-way-intersection
+        missingDir = ''
+        if self.N_connections == 3:
+            missingDir = ['north', 'east', 'south', 'west']
+            for direction in self.directions:
+                missingDir.remove(
+                    direction)  # todo: this object will be collected by garbage collection, right?
+            missingDir = missingDir[0]
+
         for entranceDirection, entranceBlock in self.intersectionEntranceBlocks.items():
             nextBlocks = {'left': None, 'straight': None, 'right': None}
             if entranceDirection == 'north':
                 nextBlocks['left'] = self.intersectionExitBlocks['east']
                 nextBlocks['straight'] = self.intersectionExitBlocks['south']
                 nextBlocks['right'] = self.intersectionExitBlocks['west']
+                if missingDir == 'east':
+                    nextBlocks.pop('left', None)
+                if missingDir == 'south':
+                    nextBlocks.pop('straight', None)
+                if missingDir == 'west':
+                    nextBlocks.pop('right', None)
+
             if entranceDirection == 'east':
                 nextBlocks['left'] = self.intersectionExitBlocks['south']
                 nextBlocks['straight'] = self.intersectionExitBlocks['west']
                 nextBlocks['right'] = self.intersectionExitBlocks['north']
+                if missingDir == 'north':
+                    nextBlocks.pop('right', None)
+                if missingDir == 'south':
+                    nextBlocks.pop('left', None)
+                if missingDir == 'west':
+                    nextBlocks.pop('straight', None)
+
             if entranceDirection == 'south':
                 nextBlocks['left'] = self.intersectionExitBlocks['west']
                 nextBlocks['straight'] = self.intersectionExitBlocks['north']
                 nextBlocks['right'] = self.intersectionExitBlocks['east']
+                if missingDir == 'north':
+                    nextBlocks.pop('straight', None)
+                if missingDir == 'east':
+                    nextBlocks.pop('right', None)
+                if missingDir == 'west':
+                    nextBlocks.pop('left', None)
+
             if entranceDirection == 'west':
                 nextBlocks['left'] = self.intersectionExitBlocks['north']
                 nextBlocks['straight'] = self.intersectionExitBlocks['east']
                 nextBlocks['right'] = self.intersectionExitBlocks['south']
+                if missingDir == 'north':
+                    nextBlocks.pop('left', None)
+                if missingDir == 'east':
+                    nextBlocks.pop('straight', None)
+                if missingDir == 'south':
+                    nextBlocks.pop('right', None)
+
             entranceBlock.set_nextBlock(nextBlocks)
+        self.intersectionExitBlocks.pop(missingDir, None)
 
     def addStreet(self, street, direction):
         if hasattr(self, direction):
@@ -87,6 +154,13 @@ class Intersection:
 
     def processCars(self,):     # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
 
+        missingDir = ''
+        if self.N_connections == 3:
+            missingDir = ['north', 'east', 'south', 'west']
+            for direction in self.directions:
+                missingDir.remove(direction)  # todo: this object will be collected by garbage collection, right?
+            missingDir = missingDir[0]
+
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             if not iBlock.car:  # entrancBlock has no car
                 continue
@@ -101,31 +175,35 @@ class Intersection:
             # traffic light is green and there is no care in nextBlock
             # ...now we want to turn left..
             if iBlock.car.nextTurn == 'left':
-                if direction == 'north':
-                    if self.intersectionEntranceBlocks['south'].car:    # opposite side has a car
-                        if self.intersectionEntranceBlocks['south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
-                            iBlock.car.increment_idleTime()
-                            continue
+                if direction == 'north':    # todo: before continuing we have to make sure ...[south] does exist!
+                    if missingDir is not 'south':
+                        if self.intersectionEntranceBlocks['south'].car:    # opposite side has a car
+                            if self.intersectionEntranceBlocks['south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                                iBlock.car.increment_idleTime()
+                                continue
 
                 elif direction == 'east':
-                    if self.intersectionEntranceBlocks['west'].car:     # opposite side has a car
-                        if self.intersectionEntranceBlocks['west'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
-                            iBlock.car.increment_idleTime()
-                            continue
+                    if missingDir is not 'west':
+                        if self.intersectionEntranceBlocks['west'].car:     # opposite side has a car
+                            if self.intersectionEntranceBlocks['west'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                                iBlock.car.increment_idleTime()
+                                continue
 
                 elif direction == 'south':
-                    if self.intersectionEntranceBlocks['north'].car:    # opposite side has a car
-                        if self.intersectionEntranceBlocks['north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
-                            iBlock.car.increment_idleTime()
-                            continue
+                    if missingDir is not 'north':
+                        if self.intersectionEntranceBlocks['north'].car:    # opposite side has a car
+                            if self.intersectionEntranceBlocks['north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                                iBlock.car.increment_idleTime()
+                                continue
 
                 elif direction == 'west':
-                    if self.intersectionEntranceBlocks['east'].car:     # opposite side has a car
-                        if self.intersectionEntranceBlocks['north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
-                            iBlock.car.increment_idleTime()
-                            continue
+                    if missingDir is not 'east':
+                        if self.intersectionEntranceBlocks['east'].car:     # opposite side has a car
+                            if self.intersectionEntranceBlocks['east'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                                iBlock.car.increment_idleTime()
+                                continue
 
-            # either we didn't intend to turn left or the opposite side didn't have a car or opposite car also turns left -> we can go
+            # either we didn't intend to turn left or the opposite side doesn't exist or didn't have a car or opposite car also turns left -> we can go
             iBlock.car.moveToNextBlock()
 
     def checkDirection(self, direction):

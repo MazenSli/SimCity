@@ -3,7 +3,7 @@
 #
 #
 
-from random import randrange
+from random import randrange, shuffle
 from modules.Street import Street
 from modules.Car import Car
 from modules.Lane import Lane
@@ -16,7 +16,9 @@ def createMap(intersections):
     dict_inter = {}
 
     for d in range(len(intersections)):
-        dict_inter[intersections[d]] = ['north', 'east', 'south', 'west']
+        dict_inter[intersections[d]] = intersections[d].directions
+
+    print(dict_inter)
 
 #    names = ['Dunhua Rd.', 'Fuxing Rd.', 'Guangfu Rd.', 'Heping Rd.',
 #             'Keelung Rd.', 'Roosevelt Rd.', 'Xinsheng Rd.', 'Xinyi Rd.',
@@ -31,14 +33,20 @@ def createMap(intersections):
              'P', 'Q']
 
     # Create and add streets
+    # shuffle intersections (for some randomness) then arrange intersections, so that the 4-way-intersections come first
+    shuffle(intersections)
     for i in range(len(intersections)):
-        inter1 = intersections.pop(randrange(len(intersections)))
+        if len(intersections[i].directions) == 4:
+            inter = intersections.pop(i)
+            intersections.insert(0, inter)
+    for i in range(len(intersections)):
+        inter1 = intersections.pop(0)   # we can always pop the first element, since the list was already shuffled
 
         if len(intersections) == 0:
             break
 
         while len(dict_inter[inter1]) > 0:
-            inter1_dir_nr = randrange(len(dict_inter[inter1]))
+            inter1_dir_nr = randrange(len(dict_inter[inter1]))      # nr = index
             inter1_dir = dict_inter[inter1].pop(inter1_dir_nr)
 
             inter2_nr = randrange(len(intersections))
@@ -51,7 +59,7 @@ def createMap(intersections):
             inter2_dir_nr = randrange(len(dict_inter[inter2]))
             inter2_dir = dict_inter[inter2].pop(inter2_dir_nr)
 
-            length = randrange(4, 12)
+            length = randrange(22, 44)
             name = names.pop(randrange(len(names)))
 
             streets.append(Street(length=length, startIs=inter1, endIs=inter2, name=name))
@@ -61,18 +69,24 @@ def createMap(intersections):
     return streets
 
 
-def generateCars(intersections):
+def generateCars(streets, N_cars=6):
     # todo
 
     cars = []
 
-    for i in intersections:
-        for street in i.streets:
-            nCars = len(street)
-            for lane in street.lanes:
-                pass
-
-    return cars
+    # todo: diese funktion ist schlecht.. es sollte jeder 'intermediate' Block die gleiche Chance haben ein
+    #  Auto zu bekommen, momentan sind lanes im Vorteil, die zuerst gefragt werden.
+    # todo: NUR ZUM TEST
+    leftCars = N_cars
+    for s in streets:
+        for lane in s.lanes:
+            newCar_position = lane.blocks[1]
+            newCar = Car(newCar_position)
+            cars.append(newCar)
+            newCar_position.set_car(newCar)
+            leftCars -= 1
+            if leftCars == 0:
+                return cars
 
 
 def setTrafficLightParameters(intersections, state):
