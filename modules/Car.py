@@ -21,7 +21,8 @@ class Car:
         super().__init__()
         self.position = position  # block
         self.idleTime = 0
-        self.nextTurn = 'straight'           # todo: 'left', 'straight', 'right'
+        self.nextTurn = 'straight'
+        self.set_nextTurn()
 
     def set_nextTurn(self):
         randNum = random.random()

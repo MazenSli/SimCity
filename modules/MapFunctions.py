@@ -3,7 +3,7 @@
 #
 #
 
-from random import randrange
+from random import randrange, shuffle
 from modules.Street import Street
 from modules.Car import Car
 from modules.Lane import Lane
@@ -16,7 +16,9 @@ def createMap(intersections):
     dict_inter = {}
 
     for d in range(len(intersections)):
-        dict_inter[intersections[d]] = ['north', 'east', 'south', 'west']
+        dict_inter[intersections[d]] = intersections[d].directions
+
+    print(dict_inter)
 
 #    names = ['Dunhua Rd.', 'Fuxing Rd.', 'Guangfu Rd.', 'Heping Rd.',
 #             'Keelung Rd.', 'Roosevelt Rd.', 'Xinsheng Rd.', 'Xinyi Rd.',
@@ -31,14 +33,20 @@ def createMap(intersections):
              'P', 'Q']
 
     # Create and add streets
+    # shuffle intersections (for some randomness) then arrange intersections, so that the 4-way-intersections come first
+    shuffle(intersections)
     for i in range(len(intersections)):
-        inter1 = intersections.pop(randrange(len(intersections)))
+        if len(intersections[i].directions) == 4:
+            inter = intersections.pop(i)
+            intersections.insert(0, inter)
+    for i in range(len(intersections)):
+        inter1 = intersections.pop(0)   # we can always pop the first element, since the list was already shuffled
 
         if len(intersections) == 0:
             break
 
         while len(dict_inter[inter1]) > 0:
-            inter1_dir_nr = randrange(len(dict_inter[inter1]))
+            inter1_dir_nr = randrange(len(dict_inter[inter1]))      # nr = index
             inter1_dir = dict_inter[inter1].pop(inter1_dir_nr)
 
             inter2_nr = randrange(len(intersections))
