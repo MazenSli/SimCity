@@ -59,7 +59,7 @@ def createMap(intersections):
             inter2_dir_nr = randrange(len(dict_inter[inter2]))
             inter2_dir = dict_inter[inter2].pop(inter2_dir_nr)
 
-            length = randrange(4, 12)
+            length = randrange(22, 44)
             name = names.pop(randrange(len(names)))
 
             streets.append(Street(length=length, startIs=inter1, endIs=inter2, name=name))
@@ -69,18 +69,24 @@ def createMap(intersections):
     return streets
 
 
-def generateCars(intersections):
+def generateCars(streets, N_cars=6):
     # todo
 
     cars = []
 
-    for i in intersections:
-        for street in i.streets:
-            nCars = len(street)
-            for lane in street.lanes:
-                pass
-
-    return cars
+    # todo: diese funktion ist schlecht.. es sollte jeder 'intermediate' Block die gleiche Chance haben ein
+    #  Auto zu bekommen, momentan sind lanes im Vorteil, die zuerst gefragt werden.
+    # todo: NUR ZUM TEST
+    leftCars = N_cars
+    for s in streets:
+        for lane in s.lanes:
+            newCar_position = lane.blocks[1]
+            newCar = Car(newCar_position)
+            cars.append(newCar)
+            newCar_position.set_car(newCar)
+            leftCars -= 1
+            if leftCars == 0:
+                return cars
 
 
 def setTrafficLightParameters(intersections, state):
