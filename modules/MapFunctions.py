@@ -6,6 +6,7 @@
 from random import randrange, shuffle
 from modules.Street import Street
 from modules.Car import Car
+import copy
 from modules.Lane import Lane
 from modules.IntersectionBlock import IntersectionBlock
 from modules.Block import Block
@@ -68,6 +69,69 @@ def createMap(intersections):
 
     return streets
 
+def createExampleMap(intersections, i_mat):
+    streets = []
+    dict_inter = {}
+    for d in range(len(intersections)):
+        dict_inter[intersections[d]] = intersections[d].directions
+
+    N_columns = 5
+    N_rows = 3
+
+    for row in range(N_rows):
+        for col in range(N_columns):
+            if (col == 0 and row == 0) or (col == 0 and row == 2) or (col == 0 and row == 1) or (col == 4 and row == 1) or (col == 4 and row == 0) or (col == 4 and row == 2):
+                continue
+            dict_inter_copy = copy.copy(dict_inter)
+            for direction in dict_inter_copy[i_mat[col][row]]:
+                if direction == 'north':
+                    length = randrange(22, 44)
+                    streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col][row-1]))
+                    i_mat[col][row].addStreet(street=streets[-1], direction='north')
+                    i_mat[col][row-1].addStreet(street=streets[-1], direction='south')
+                    dict_inter[i_mat[col][row-1]].remove('south')
+                if direction == 'east':
+                    length = randrange(22, 44)
+                    if i_mat[col+1][row] is None:
+                        streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[4][1]))
+                        i_mat[col][row].addStreet(street=streets[-1], direction='east')
+                        if i_mat[col][row] is i_mat[3][0]:
+                            i_mat[4][1].addStreet(street=streets[-1], direction='north')
+                            dict_inter[i_mat[4][1]].remove('north')
+                        elif i_mat[col][row] is i_mat[3][2]:
+                            i_mat[4][1].addStreet(street=streets[-1], direction='south')
+                            dict_inter[i_mat[4][1]].remove('south')
+                    else:
+                        length = randrange(22, 56)
+                        streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col+1][row]))
+                        i_mat[col][row].addStreet(street=streets[-1], direction='east')
+                        i_mat[col+1][row].addStreet(street=streets[-1], direction='west')
+                        dict_inter[i_mat[col+1][row]].remove('west')
+                if direction == 'south':
+                    length = randrange(22, 44)
+                    streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col][row+1]))
+                    i_mat[col][row].addStreet(street=streets[-1], direction='south')
+                    i_mat[col][row+1].addStreet(street=streets[-1], direction='north')
+                    dict_inter[i_mat[col][row+1]].remove('north')
+                if direction == 'west':
+                    length = randrange(22, 44)
+                    if i_mat[col-1][row] is None:
+                        streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[0][1]))
+                        i_mat[col][row].addStreet(street=streets[-1], direction='west')
+                        if i_mat[col][row] is i_mat[1][0]:
+                            i_mat[0][1].addStreet(street=streets[-1], direction='north')
+                            dict_inter[i_mat[0][1]].remove('north')
+                        elif i_mat[col][row] is i_mat[1][2]:
+                            i_mat[0][1].addStreet(street=streets[-1], direction='south')
+                            dict_inter[i_mat[0][1]].remove('south')
+                    else:
+                        length = randrange(22, 44)
+                        streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col-1][row]))
+                        i_mat[col][row].addStreet(street=streets[-1], direction='west')
+                        i_mat[col-1][row].addStreet(street=streets[-1], direction='east')
+                        dict_inter[i_mat[col-1][row]].remove('east')
+
+    return streets
 
 def generateCars(streets, N_cars=6):
     # todo

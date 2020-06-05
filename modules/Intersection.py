@@ -12,7 +12,7 @@ class Intersection:
     #
 
     # constructor
-    def __init__(self, name=None, N_connections=4):
+    def __init__(self, name=None, N_connections=4, missing_dir=None):
         if name is not None:
             setattr(self, 'name', name)
         self.streets = []
@@ -23,6 +23,7 @@ class Intersection:
         self.intersectionEntranceBlocks = None
         self.intersectionExitBlocks = None
         self.toggleShift = 0  # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
+        self.missing_dir = missing_dir
 
         self._init_intersection_directions()
         self._init_intersectionEntranceBlocks()
@@ -32,11 +33,12 @@ class Intersection:
     # set in a dictionary with keys: left straight and right, representing the turns a car can perform at an inters.
     def _init_intersection_directions(self):
         directions = ['north', 'east', 'south', 'west']
-        if self.N_connections == 4:
-            self.directions = directions
-        elif self.N_connections == 3:
-            directions.pop(randrange(0, 4))
-            self.directions = directions
+        if self.N_connections == 3:
+            if self.missing_dir:
+                directions.remove(self.missing_dir)
+            else:
+                directions.pop(randrange(0, 4))
+        self.directions = directions
 
     # intersectionEntryBlocks represent the end of a road and the entrance of an Intersection.
     # Those blocks are the only "IntersectionBlock" objects, they have to be special, because

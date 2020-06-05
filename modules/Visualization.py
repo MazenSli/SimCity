@@ -10,7 +10,7 @@ import random
 
 from modules.Intersection import Intersection
 from modules.Street import Street
-from modules.MapFunctions import createMap, generateCars
+from modules.MapFunctions import createMap, createExampleMap, generateCars
 
 # 1920x1080
 time_per_frame = 0.016667  # seconds
@@ -89,7 +89,6 @@ def init_setup_blockPositions(streets, window):
                 if i is 0:
                     i += 1
                     continue
-                print('it', i)
                 lane_visual_length_x = (lane.blocks[lane.length-1].visualizationPoint.x_loc - lane.blocks[0].visualizationPoint.x_loc)
                 lane_visual_length_y = (lane.blocks[lane.length-1].visualizationPoint.y_loc - lane.blocks[0].visualizationPoint.y_loc)
                 block_vector = Point(lane_visual_length_x * i/(lane.length-1), lane_visual_length_y * i/(lane.length-1))
@@ -149,29 +148,68 @@ def render(intersections, streets, window):
 
 
 def visualize(intersections, streets):
-    window = WindowWrapper()
-    simIntersections = [SimIntersection(300, 500, intersections[0]),
-                        SimIntersection(950, 200, intersections[1]),
-                        SimIntersection(1700, 500, intersections[2]),
-                        SimIntersection(950, 900, intersections[3]),
-                        SimIntersection(950, 500, intersections[4])]
+    screen_width = 1920
+    screen_height = 1080
 
-    init_setup_blockPositions(streets,window)
+    window = WindowWrapper()
+    simIntersections = [SimIntersection(int(2*screen_width/6), 1*screen_height/4, intersections[0]),
+                        SimIntersection(int(3*screen_width/6), 1*screen_height/4, intersections[1]),
+                        SimIntersection(int(4*screen_width/6), 1*screen_height/4, intersections[2]),
+                        SimIntersection(int(1*screen_width/6), 2*screen_height/4, intersections[3]),
+                        ]
+
+    init_setup_blockPositions(streets, window)
 
     run(simIntersections, streets, window)
 
+def visualize_example():
+    I1 = Intersection(name='10', N_connections=3, missing_dir='north')
+    I2 = Intersection(name='20', N_connections=3, missing_dir='north')
+    I3 = Intersection(name='30', N_connections=3, missing_dir='north')
+    I4 = Intersection(name='01', N_connections=3, missing_dir='west')
+    I5 = Intersection(name='11', N_connections=4)
+    I6 = Intersection(name='21', N_connections=4)
+    I7 = Intersection(name='31', N_connections=4)
+    I8 = Intersection(name='41', N_connections=3, missing_dir='east')
+    I9 = Intersection(name='12', N_connections=3, missing_dir='south')
+    I10 = Intersection(name='22', N_connections=3, missing_dir='south')
+    I11 = Intersection(name='32', N_connections=3, missing_dir='south')
 
-I1 = Intersection(name='1', N_connections=3)
-I2 = Intersection(name='2', N_connections=3)
-I3 = Intersection(name='3', N_connections=3)
-I4 = Intersection(name='4', N_connections=3)
-I5 = Intersection(name='5')
+    intersection_matrix = []
+    col1 = [None, I4, None]
+    col2 = [I1, I5, I9]
+    col3 = [I2, I6, I10]
+    col4 = [I3, I7, I11]
+    col5 = [None, I8, None]
 
-anyIntersections = [I1, I2, I3, I4, I5]
+    intersection_matrix.append(col1)
+    intersection_matrix.append(col2)
+    intersection_matrix.append(col3)
+    intersection_matrix.append(col4)
+    intersection_matrix.append(col5)
 
-anyStreets = createMap([I1, I2, I3, I4, I5])
+    intersections = [I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11]
+    streets = createExampleMap(intersections, intersection_matrix)
+    generateCars(streets)
 
-generateCars(anyStreets)
+    screen_width = 1920
+    screen_height = 1080
 
-visualize(anyIntersections, anyStreets)
+    window = WindowWrapper()
+    simIntersections = [SimIntersection(int(2 * screen_width / 6), 1 * screen_height / 4, intersections[0]),
+                        SimIntersection(int(3 * screen_width / 6), 1 * screen_height / 4, intersections[1]),
+                        SimIntersection(int(4 * screen_width / 6), 1 * screen_height / 4, intersections[2]),
+                        SimIntersection(int(1 * screen_width / 6), 2 * screen_height / 4, intersections[3]),
+                        SimIntersection(int(2 * screen_width / 6), 2 * screen_height / 4, intersections[4]),
+                        SimIntersection(int(3 * screen_width / 6), 2 * screen_height / 4, intersections[5]),
+                        SimIntersection(int(4 * screen_width / 6), 2 * screen_height / 4, intersections[6]),
+                        SimIntersection(int(5 * screen_width / 6), 2 * screen_height / 4, intersections[7]),
+                        SimIntersection(int(2 * screen_width / 6), 3 * screen_height / 4, intersections[8]),
+                        SimIntersection(int(3 * screen_width / 6), 3 * screen_height / 4, intersections[9]),
+                        SimIntersection(int(4 * screen_width / 6), 3 * screen_height / 4, intersections[10])]
 
+    init_setup_blockPositions(streets, window)
+
+    run(simIntersections, streets, window)
+
+visualize_example()
