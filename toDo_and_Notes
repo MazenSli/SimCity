@@ -1,0 +1,5 @@
+- Ich glaube manchmal fahren Autos immernoch in Colonnen direkt hintereinander, obwohl das eigentlich nicht mögich sein sollte
+- Ampeln schalten
+- generateCars sinnvoll implementieren
+- 3er Kreuzungen haben in der Visualisierung immernoch an allen vier Seiten 'Ein- und Ausgänge'
+- Zeitmaßstab in der Visu stimmt nicht. Ist die render function zu langsam?

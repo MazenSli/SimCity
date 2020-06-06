@@ -9,8 +9,8 @@ import pygame as game
 import random
 
 from modules.Intersection import Intersection
-from modules.Street import Street
 from modules.MapFunctions import createMap, createExampleMap, generateCars
+
 
 # 1920x1080
 time_per_frame = 0.016667  # seconds
@@ -43,8 +43,8 @@ class SimIntersection:
         self.location = np.array((x_loc, y_loc))
         self.color = game.Color(color_r, color_g, color_b)
         self.intersection = intersection
-        self.width = 80
-        self.height = 80
+        self.width = 50
+        self.height = 50
         self.enterExit_width = 10
         self.enterExit_height= 10
         self.rect = game.Rect(x_loc-self.width/2, y_loc-self.height/2, self.width, self.height)
@@ -80,7 +80,7 @@ class SimIntersection:
             block.visualizationPoint = self.exitPoints[dir]
 
 
-def init_setup_blockPositions(streets, window):
+def init_setup_blockPositions(streets):
     for street in streets:
         for lane in street.lanes:
             i = 0
@@ -109,14 +109,15 @@ def draw_streets(streets, window):
             for block in lane.blocks:
                 if block.car:
                     game.draw.circle(window.screen, car_color, (int(block.visualizationPoint.x_loc), int(block.visualizationPoint.y_loc)), car_radius)
-                else:
-                    game.draw.circle(window.screen, block_color, (int(block.visualizationPoint.x_loc), int(block.visualizationPoint.y_loc)), block_radius)
+                #else:
+                #    game.draw.circle(window.screen, block_color, (int(block.visualizationPoint.x_loc), int(block.visualizationPoint.y_loc)), block_radius)
             game.draw.line(window.screen, game.Color(80, 80, 170), (lane.blocks[0].visualizationPoint.x_loc, lane.blocks[0].visualizationPoint.y_loc), (lane.blocks[lane.length-1].visualizationPoint.x_loc, lane.blocks[lane.length-1].visualizationPoint.y_loc), 2)
 
 
-def run(simIntersections, streets, window):
+def run(simIntersections, streets, cars, window):
     t0 = time.perf_counter()
     time_counter = 0
+    a=0
     while window.running:
         event_update(window)
         if (time.perf_counter() - t0) >= time_per_frame:
@@ -126,8 +127,13 @@ def run(simIntersections, streets, window):
             #update_physics(time_past)
             render(simIntersections, streets, window)
             t0 = time.perf_counter()
-            if time_counter >= 2:
+            if time_counter >= 5:
                 # slower event...
+                a += 1
+                for simInter in simIntersections:
+                    simInter.intersection.processCars()
+                for car in cars:
+                    car.moveCar()
                 # for i in simIntersections:
                 #     i.set_location(i.location[0]+int(5*random.uniform(-1, 1)), i.location[1])
                 time_counter = 0
@@ -147,20 +153,21 @@ def render(intersections, streets, window):
     game.display.flip()
 
 
-def visualize(intersections, streets):
+def visualize(intersections, streets, cars):
     screen_width = 1920
     screen_height = 1080
 
     window = WindowWrapper()
-    simIntersections = [SimIntersection(int(2*screen_width/6), 1*screen_height/4, intersections[0]),
-                        SimIntersection(int(3*screen_width/6), 1*screen_height/4, intersections[1]),
-                        SimIntersection(int(4*screen_width/6), 1*screen_height/4, intersections[2]),
-                        SimIntersection(int(1*screen_width/6), 2*screen_height/4, intersections[3]),
+
+    simIntersections = [SimIntersection(int(screen_width/4), 100, intersections[0]),
+                        SimIntersection(int(3*screen_width/4), screen_height/3, intersections[1]),
+                        SimIntersection(int(screen_width/2), 3*screen_height/4, intersections[2]),
+                        SimIntersection(int(2*screen_width/4), screen_height/6, intersections[3])
                         ]
 
-    init_setup_blockPositions(streets, window)
+    init_setup_blockPositions(streets)
 
-    run(simIntersections, streets, window)
+    run(simIntersections, streets, cars, window)
 
 def visualize_example():
     I1 = Intersection(name='10', N_connections=3, missing_dir='north')
@@ -190,7 +197,7 @@ def visualize_example():
 
     intersections = [I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11]
     streets = createExampleMap(intersections, intersection_matrix)
-    generateCars(streets)
+    cars = generateCars(streets)
 
     screen_width = 1920
     screen_height = 1080
@@ -208,8 +215,24 @@ def visualize_example():
                         SimIntersection(int(3 * screen_width / 6), 3 * screen_height / 4, intersections[9]),
                         SimIntersection(int(4 * screen_width / 6), 3 * screen_height / 4, intersections[10])]
 
-    init_setup_blockPositions(streets, window)
+    init_setup_blockPositions(streets)
 
-    run(simIntersections, streets, window)
+    run(simIntersections, streets, cars, window)
 
 visualize_example()
+
+'''I1 = Intersection()
+I2 = Intersection()
+I3 = Intersection()
+I4 = Intersection()
+
+intersections = [I1, I2, I3, I4]
+
+streets = createMap(intersections)
+
+intersections = [I1, I2, I3, I4]
+
+cars = generateCars(streets)
+
+visualize(intersections, streets, cars)
+'''
