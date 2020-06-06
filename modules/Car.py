@@ -22,30 +22,51 @@ class Car:
         self.position = position  # block
         self.idleTime = 0
         self.nextTurn = 'straight'
-        self.set_nextTurn()
 
     def set_nextTurn(self):
         randNum = random.random()
 
-        if randNum < self.turnLeftProb:
-            self.nextTurn = 'left'
-        elif randNum > 1-self.turnRightProb:
-            self.nextTurn = 'right'
-        else:
-            self.nextTurn = 'straight'
+        if self.position.relatedIntersection.missing_dir is None:
+            if randNum < self.turnLeftProb:
+                self.nextTurn = 'left'
+            elif randNum > 1 - self.turnRightProb:
+                self.nextTurn = 'right'
+            else:
+                self.nextTurn = 'straight'
+            return
+
+        if 'left' not in self.position.nextBlock:
+            if randNum < (self.turnLeftProb+self.turnRightProb):
+                self.nextTurn = 'right'
+            else:
+                self.nextTurn = 'straight'
+        elif 'right' not in self.position.nextBlock:
+            if randNum < (self.turnLeftProb+self.turnRightProb):
+                self.nextTurn = 'left'
+            else:
+                self.nextTurn = 'straight'
+        elif 'straight' not in self.position.nextBlock:
+            left = self.turnLeftProb+self.turnStraightProb/2
+            if randNum < left:
+                self.nextTurn = 'left'
+            else:
+                self.nextTurn = 'right'
 
     def increment_idleTime(self):
         self.idleTime += 1
 
     def moveToNextBlock(self):
+
+        self.position.remove_car()
         if type(self.position) == IntersectionBlock:
-            self.position = self.position.nextBlock[self.nextTurn]
             self.position.nextBlock[self.nextTurn].set_car(self)
+            self.position = self.position.nextBlock[self.nextTurn]
         else:
             self.position.nextBlock.set_car(self)
             self.position = self.position.nextBlock
 
-        self.position.remove_car()
+        if type(self.position) == IntersectionBlock:
+            self.set_nextTurn()     # todo: will cars change their mind regarding the direction they want to take after standing? I don't think so..
 
 
     # todo: what should happen if there is a car in front of the car? (That car might move as well in this timestamp,
@@ -58,7 +79,7 @@ class Car:
             return
         # -> car is located at a normal block ("non-intersectionBlock")
 
-        if self.position.nextBlock.car():   # car won't move as long as there is another car in front of it
+        if self.position.nextBlock.car:   # car won't move as long as there is another car in front of it
             self.idleTime += 1
             return
         else:                               # no car in nextBlock -> car can go

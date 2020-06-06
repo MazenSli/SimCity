@@ -102,7 +102,7 @@ def createExampleMap(intersections, i_mat):
                             i_mat[4][1].addStreet(street=streets[-1], direction='south')
                             dict_inter[i_mat[4][1]].remove('south')
                     else:
-                        length = randrange(22, 56)
+                        length = randrange(22, 44)
                         streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col+1][row]))
                         i_mat[col][row].addStreet(street=streets[-1], direction='east')
                         i_mat[col+1][row].addStreet(street=streets[-1], direction='west')
@@ -133,8 +133,8 @@ def createExampleMap(intersections, i_mat):
 
     return streets
 
-def generateCars(streets, N_cars=6):
-    # todo
+def generateCars(streets, N_cars=60):
+    # todo BAUSTELLE, DIE FUNKTION MUSS KOMPLETT ÜBERARBEITET WERDEN
 
     cars = []
 
@@ -144,13 +144,14 @@ def generateCars(streets, N_cars=6):
     leftCars = N_cars
     for s in streets:
         for lane in s.lanes:
-            newCar_position = lane.blocks[1]
-            newCar = Car(newCar_position)
-            cars.append(newCar)
-            newCar_position.set_car(newCar)
-            leftCars -= 1
-            if leftCars == 0:
-                return cars
+            newCar_positions = [lane.blocks[1],lane.blocks[2],lane.blocks[3],lane.blocks[4],lane.blocks[5],lane.blocks[6],lane.blocks[7]]
+            for newCar_position in newCar_positions:
+                newCar = Car(newCar_position)
+                cars.append(newCar)
+                newCar_position.set_car(newCar)
+                leftCars -= 1
+                if leftCars == 0:
+                    return cars
 
 
 def setTrafficLightParameters(intersections, state):
