@@ -15,14 +15,16 @@ class Intersection:
     def __init__(self, name=None, N_connections=4, missing_dir=None):
         if name is not None:
             setattr(self, 'name', name)
+        self.time_counter = 0
         self.streets = []
         self.north_greenRatio = 0.5
-        self.intersectionTime = 60
+        self.intersectionTime = 250  #400
+        self.toggleShift = randrange(0, self.intersectionTime*self.north_greenRatio+1)  # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
+        self.timer = int(self.intersectionTime*self.north_greenRatio) - self.toggleShift
         self.N_connections = N_connections
         self.directions = None
         self.intersectionEntranceBlocks = None
         self.intersectionExitBlocks = None
-        self.toggleShift = 0  # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
         self.missing_dir = missing_dir
 
         self._init_directions()
@@ -47,11 +49,17 @@ class Intersection:
     # Those blocks are the only "IntersectionBlock" objects, they have to be special, because
     # they have more than one "nextBlock"
     def _init_intersectionEntranceBlocks(self):
+        red_green_init = None
+        if randrange(0, 2) == 1:
+            red_green_init = True
+        else:
+            red_green_init = False
+
         self.intersectionEntranceBlocks = {     # todo: BlockType und relatedIntersection wurden zu testzwecken eingeführt und sind eventuell unnötig
-            'north': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self),
-            'east': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self),
-            'south': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self),
-            'west': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self)
+            'north': IntersectionBlock(red_green_init, blockType='roadEnd', relatedIntersection=self),
+            'east': IntersectionBlock(not red_green_init, blockType='roadEnd', relatedIntersection=self),
+            'south': IntersectionBlock(red_green_init, blockType='roadEnd', relatedIntersection=self),
+            'west': IntersectionBlock(not red_green_init, blockType='roadEnd', relatedIntersection=self)
         }
         if self.N_connections == 3:
             self.intersectionEntranceBlocks.pop(self.missing_dir, None)
@@ -135,15 +143,24 @@ class Intersection:
             self.streets.append(street)
             setattr(self, direction, street)
 
-    def set_greenRatio(self, north_greenRatio):     # todo: greenRatio von jew. diagonalen intersectionBlocks muss gleich sein, die restl. sind 1-greenRatio.
-            pass
-
     def toggle_lights(self):
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             iBlock.toggle_light()
 
-    def processCars(self,):     # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
-                                #  DOESN'T WORK FOR 3-WAY-INTERSECTIONS YET !!!!!
+    def process_intersection(self):     # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
+        if self.timer <= 0:
+            if 'north' in self.intersectionEntranceBlocks.keys():
+                if self.intersectionEntranceBlocks['north'].isGreen:
+                    self.timer = (1-self.north_greenRatio)*self.intersectionTime
+                else:
+                    self.timer = self.north_greenRatio * self.intersectionTime
+            else:
+                if self.intersectionEntranceBlocks['south'].isGreen:
+                    self.timer = (1-self.north_greenRatio)*self.intersectionTime
+                else:
+                    self.timer = self.north_greenRatio * self.intersectionTime
+            self.toggle_lights()
+        self.timer -= 1
 
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             if not iBlock.car:  # entrancBlock has no car

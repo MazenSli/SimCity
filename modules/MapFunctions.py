@@ -75,6 +75,9 @@ def createExampleMap(intersections, i_mat):
     for d in range(len(intersections)):
         dict_inter[intersections[d]] = intersections[d].directions
 
+    street_length_min = 100
+    street_length_max = 200
+
     N_columns = 5
     N_rows = 3
 
@@ -85,13 +88,13 @@ def createExampleMap(intersections, i_mat):
             dict_inter_copy = copy.copy(dict_inter)
             for direction in dict_inter_copy[i_mat[col][row]]:
                 if direction == 'north':
-                    length = randrange(22, 44)
+                    length = randrange(street_length_min, street_length_max)
                     streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col][row-1]))
                     i_mat[col][row].addStreet(street=streets[-1], direction='north')
                     i_mat[col][row-1].addStreet(street=streets[-1], direction='south')
                     dict_inter[i_mat[col][row-1]].remove('south')
                 if direction == 'east':
-                    length = randrange(22, 44)
+                    length = randrange(street_length_min, street_length_max)
                     if i_mat[col+1][row] is None:
                         streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[4][1]))
                         i_mat[col][row].addStreet(street=streets[-1], direction='east')
@@ -102,19 +105,19 @@ def createExampleMap(intersections, i_mat):
                             i_mat[4][1].addStreet(street=streets[-1], direction='south')
                             dict_inter[i_mat[4][1]].remove('south')
                     else:
-                        length = randrange(22, 44)
+                        length = randrange(street_length_min, street_length_max)
                         streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col+1][row]))
                         i_mat[col][row].addStreet(street=streets[-1], direction='east')
                         i_mat[col+1][row].addStreet(street=streets[-1], direction='west')
                         dict_inter[i_mat[col+1][row]].remove('west')
                 if direction == 'south':
-                    length = randrange(22, 44)
+                    length = randrange(street_length_min, street_length_max)
                     streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col][row+1]))
                     i_mat[col][row].addStreet(street=streets[-1], direction='south')
                     i_mat[col][row+1].addStreet(street=streets[-1], direction='north')
                     dict_inter[i_mat[col][row+1]].remove('north')
                 if direction == 'west':
-                    length = randrange(22, 44)
+                    length = randrange(street_length_min, street_length_max)
                     if i_mat[col-1][row] is None:
                         streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[0][1]))
                         i_mat[col][row].addStreet(street=streets[-1], direction='west')
@@ -125,7 +128,7 @@ def createExampleMap(intersections, i_mat):
                             i_mat[0][1].addStreet(street=streets[-1], direction='south')
                             dict_inter[i_mat[0][1]].remove('south')
                     else:
-                        length = randrange(22, 44)
+                        length = randrange(street_length_min, street_length_max)
                         streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col-1][row]))
                         i_mat[col][row].addStreet(street=streets[-1], direction='west')
                         i_mat[col-1][row].addStreet(street=streets[-1], direction='east')
@@ -133,7 +136,7 @@ def createExampleMap(intersections, i_mat):
 
     return streets
 
-def generateCars(streets, N_cars=60):
+def generateCars(streets, N_cars=800):
     # todo BAUSTELLE, DIE FUNKTION MUSS KOMPLETT ÜBERARBEITET WERDEN
 
     cars = []
@@ -142,16 +145,19 @@ def generateCars(streets, N_cars=60):
     #  Auto zu bekommen, momentan sind lanes im Vorteil, die zuerst gefragt werden.
     # todo: NUR ZUM TEST
     leftCars = N_cars
-    for s in streets:
-        for lane in s.lanes:
-            newCar_positions = [lane.blocks[1],lane.blocks[2],lane.blocks[3],lane.blocks[4],lane.blocks[5],lane.blocks[6],lane.blocks[7]]
-            for newCar_position in newCar_positions:
-                newCar = Car(newCar_position)
-                cars.append(newCar)
-                newCar_position.set_car(newCar)
-                leftCars -= 1
-                if leftCars == 0:
-                    return cars
+    while leftCars >= 0:
+        street = streets[randrange(0, len(streets))]
+        lane = street.lanes[randrange(0, 2)]
+        newCar_position = lane.blocks[randrange(1, len(lane.blocks)-1)]
+        if newCar_position.car:
+            # this is not a good design but we don't really have to worry about it, since this "if" very unlikely...
+            continue
+        newCar = Car(newCar_position)
+        cars.append(newCar)
+        newCar_position.set_car(newCar)
+        print(leftCars)
+        leftCars -= 1
+    return cars
 
 
 def setTrafficLightParameters(intersections, state):
