@@ -123,7 +123,7 @@ def draw_streets(streets, window):
     block_color = game.Color(255, 255, 255)
     block_radius = 3
     car_color = game.Color(255, 165, 0)
-    car_radius = 5
+    car_radius = 3
 
     for street in streets:
         for lane in street.lanes:
@@ -131,8 +131,8 @@ def draw_streets(streets, window):
             for block in lane.blocks:
                 if block.car:
                     game.draw.circle(window.screen, car_color, (int(block.visualizationPoint.x_loc), int(block.visualizationPoint.y_loc)), car_radius)
-                else:
-                    game.draw.circle(window.screen, block_color, (int(block.visualizationPoint.x_loc), int(block.visualizationPoint.y_loc)), block_radius)
+                #else:
+                #    game.draw.circle(window.screen, block_color, (int(block.visualizationPoint.x_loc), int(block.visualizationPoint.y_loc)), block_radius)
 
     # todo: something like this would be cool for performance while visualizing but not priority.
     '''def init_screen(window, intersections, streets): 
@@ -159,7 +159,7 @@ def run(simIntersections, streets, cars, window):
             time_past = (time.perf_counter() - t0)
             #update_physics(time_past)
             t0 = time.perf_counter()
-            if time_counter >= 20:
+            if time_counter >= 1:
                 # slower event...
                 a += 1
                 print(a)

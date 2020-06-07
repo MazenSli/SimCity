@@ -75,8 +75,8 @@ def createExampleMap(intersections, i_mat):
     for d in range(len(intersections)):
         dict_inter[intersections[d]] = intersections[d].directions
 
-    street_length_min = 10
-    street_length_max = 11
+    street_length_min = 100
+    street_length_max = 200
 
     N_columns = 5
     N_rows = 3
@@ -136,7 +136,7 @@ def createExampleMap(intersections, i_mat):
 
     return streets
 
-def generateCars(streets, N_cars=7):
+def generateCars(streets, N_cars=800):
     # todo BAUSTELLE, DIE FUNKTION MUSS KOMPLETT ÜBERARBEITET WERDEN
 
     cars = []
@@ -145,16 +145,19 @@ def generateCars(streets, N_cars=7):
     #  Auto zu bekommen, momentan sind lanes im Vorteil, die zuerst gefragt werden.
     # todo: NUR ZUM TEST
     leftCars = N_cars
-    for s in streets:
-        for lane in s.lanes:
-            newCar_positions = [lane.blocks[1],lane.blocks[2],lane.blocks[3],lane.blocks[4],lane.blocks[5],lane.blocks[6],lane.blocks[7]]
-            for newCar_position in newCar_positions:
-                newCar = Car(newCar_position)
-                cars.append(newCar)
-                newCar_position.set_car(newCar)
-                leftCars -= 1
-                if leftCars == 0:
-                    return cars
+    while leftCars >= 0:
+        street = streets[randrange(0, len(streets))]
+        lane = street.lanes[randrange(0, 2)]
+        newCar_position = lane.blocks[randrange(1, len(lane.blocks)-1)]
+        if newCar_position.car:
+            # this is not a good design but we don't really have to worry about it, since this "if" very unlikely...
+            continue
+        newCar = Car(newCar_position)
+        cars.append(newCar)
+        newCar_position.set_car(newCar)
+        print(leftCars)
+        leftCars -= 1
+    return cars
 
 
 def setTrafficLightParameters(intersections, state):

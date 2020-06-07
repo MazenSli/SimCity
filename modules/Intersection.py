@@ -18,7 +18,7 @@ class Intersection:
         self.time_counter = 0
         self.streets = []
         self.north_greenRatio = 0.5
-        self.intersectionTime = 30  #400
+        self.intersectionTime = 250  #400
         self.toggleShift = randrange(0, self.intersectionTime*self.north_greenRatio+1)  # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
         self.timer = int(self.intersectionTime*self.north_greenRatio) - self.toggleShift
         self.N_connections = N_connections
