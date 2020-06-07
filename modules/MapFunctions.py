@@ -75,6 +75,9 @@ def createExampleMap(intersections, i_mat):
     for d in range(len(intersections)):
         dict_inter[intersections[d]] = intersections[d].directions
 
+    street_length_min = 10
+    street_length_max = 11
+
     N_columns = 5
     N_rows = 3
 
@@ -85,13 +88,13 @@ def createExampleMap(intersections, i_mat):
             dict_inter_copy = copy.copy(dict_inter)
             for direction in dict_inter_copy[i_mat[col][row]]:
                 if direction == 'north':
-                    length = randrange(22, 44)
+                    length = randrange(street_length_min, street_length_max)
                     streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col][row-1]))
                     i_mat[col][row].addStreet(street=streets[-1], direction='north')
                     i_mat[col][row-1].addStreet(street=streets[-1], direction='south')
                     dict_inter[i_mat[col][row-1]].remove('south')
                 if direction == 'east':
-                    length = randrange(22, 44)
+                    length = randrange(street_length_min, street_length_max)
                     if i_mat[col+1][row] is None:
                         streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[4][1]))
                         i_mat[col][row].addStreet(street=streets[-1], direction='east')
@@ -102,19 +105,19 @@ def createExampleMap(intersections, i_mat):
                             i_mat[4][1].addStreet(street=streets[-1], direction='south')
                             dict_inter[i_mat[4][1]].remove('south')
                     else:
-                        length = randrange(22, 44)
+                        length = randrange(street_length_min, street_length_max)
                         streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col+1][row]))
                         i_mat[col][row].addStreet(street=streets[-1], direction='east')
                         i_mat[col+1][row].addStreet(street=streets[-1], direction='west')
                         dict_inter[i_mat[col+1][row]].remove('west')
                 if direction == 'south':
-                    length = randrange(22, 44)
+                    length = randrange(street_length_min, street_length_max)
                     streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col][row+1]))
                     i_mat[col][row].addStreet(street=streets[-1], direction='south')
                     i_mat[col][row+1].addStreet(street=streets[-1], direction='north')
                     dict_inter[i_mat[col][row+1]].remove('north')
                 if direction == 'west':
-                    length = randrange(22, 44)
+                    length = randrange(street_length_min, street_length_max)
                     if i_mat[col-1][row] is None:
                         streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[0][1]))
                         i_mat[col][row].addStreet(street=streets[-1], direction='west')
@@ -125,7 +128,7 @@ def createExampleMap(intersections, i_mat):
                             i_mat[0][1].addStreet(street=streets[-1], direction='south')
                             dict_inter[i_mat[0][1]].remove('south')
                     else:
-                        length = randrange(22, 44)
+                        length = randrange(street_length_min, street_length_max)
                         streets.append(Street(length=length, startIs=i_mat[col][row], endIs=i_mat[col-1][row]))
                         i_mat[col][row].addStreet(street=streets[-1], direction='west')
                         i_mat[col-1][row].addStreet(street=streets[-1], direction='east')
@@ -133,7 +136,7 @@ def createExampleMap(intersections, i_mat):
 
     return streets
 
-def generateCars(streets, N_cars=60):
+def generateCars(streets, N_cars=7):
     # todo BAUSTELLE, DIE FUNKTION MUSS KOMPLETT ÜBERARBEITET WERDEN
 
     cars = []
