@@ -12,13 +12,12 @@
 #
 
 import yaml
-from copy import deepcopy
+import copy
 from random import Random
 
 from ea.Population import *
 from ea.Evaluator import *
 from modules.MapFunctions import generateCars, simulateTraffic, setLightParams
-
 
 # EV3 Config class
 class EV3_Config:
@@ -33,7 +32,8 @@ class EV3_Config:
                'crossoverFraction': (float, True),
                'trafficLightA': (float, False),
                'minIntersectionTime': (float, False),
-               'maxIntersectionTime': (float, False)}
+               'maxIntersectionTime': (float, False),
+               'minNorthGreenRatio': (float, False)}
 
     # constructor
     def __init__(self, inFileName, nLength):
@@ -110,6 +110,8 @@ def ev3(cfg, intersections, streets):
     MultivariateIndividual.nLength = cfg.nLength
     MultivariateIndividual.minIntersectionTime = cfg.minIntersectionTime
     MultivariateIndividual.maxIntersectionTime = cfg.maxIntersectionTime
+    MultivariateIndividual.minNorthGreenRatio = cfg.minNorthGreenRatio
+
     MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
     MultivariateIndividual.learningRate = 1.0 / math.sqrt(cfg.nLength)
 
@@ -121,24 +123,39 @@ def ev3(cfg, intersections, streets):
     # print initial pop stats
     printStats(population, 0)
 
+    cars = generateCars(streets, 60)
+    #original_car_positions = []
+    #for car in cars:
+    #    original_car_positions.append(car.position)
+
     # evolution main loop
     for i in range(cfg.generationCount):
 
-        cars = generateCars(streets, 60)
-        simTime = 60
+        simTime = 1500
         TrafficLightExp.simTime = simTime
 
         for ind in population:
-            cars_ind = deepcopy(cars)
+
+            cars_ind = []
+            for car in cars:
+                car_ind = copy.copy(car)
+                cars_ind.append(car_ind)
+
+            for car_ind in cars_ind:
+                car_ind.position.set_car(car_ind)
 
             setLightParams(intersections, ind.state)
+            #setLightParams(intersections, [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]])
             simulateTraffic(intersections, cars_ind, simTime)
-
+            c = 0
+            for k in cars_ind:
+                c += 1
+                print('idleTime of car', c, ':', k.idleTime)
             ind.setIdleTimes(cars_ind)
+
             for car in cars_ind:
                 car.position.remove_car()
-            for car in cars:
-                car.position.remove_car()
+
 
         # create initial offspring population by copying parent pop
         offspring = population.copy()
