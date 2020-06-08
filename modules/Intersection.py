@@ -152,7 +152,6 @@ class Intersection:
             iBlock.toggle_light()
 
     def set_lights(self, north_greenRatio, intersectionTime, toggleShift):
-        self.time_counter = 0
         self.north_greenRatio = north_greenRatio
         self.intersectionTime = intersectionTime
         self.toggleShift = toggleShift
