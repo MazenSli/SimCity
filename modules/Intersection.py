@@ -19,7 +19,7 @@ class Intersection:
         self.time_counter = 0
         self.streets = []
         self.north_greenRatio = 0.5
-        self.intersectionTime = 250  # 400
+        self.intersectionTime = 0  # 250
         self.toggleShift = randrange(0,
                                      self.intersectionTime * self.north_greenRatio + 1)
         # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
@@ -152,7 +152,6 @@ class Intersection:
             iBlock.toggle_light()
 
     def set_lights(self, north_greenRatio, intersectionTime, toggleShift):
-        self.time_counter = 0
         self.north_greenRatio = north_greenRatio
         self.intersectionTime = intersectionTime
         self.toggleShift = toggleShift
@@ -160,7 +159,7 @@ class Intersection:
 
     def process_intersection(
             self):  # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
-        if self.timer <= 0:
+        if self.timer < 0:  # if the timer is set to 0, the traffic light will still not switch the very next iteration
             if 'north' in self.intersectionEntranceBlocks.keys():
                 if self.intersectionEntranceBlocks['north'].isGreen:
                     self.timer = (1 - self.north_greenRatio) * self.intersectionTime
@@ -172,7 +171,8 @@ class Intersection:
                 else:
                     self.timer = self.north_greenRatio * self.intersectionTime
             self.toggle_lights()
-        self.timer -= 1
+        else:
+            self.timer -= 1
 
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             if not iBlock.car:  # entrancBlock has no car

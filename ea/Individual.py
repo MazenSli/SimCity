@@ -45,6 +45,8 @@ class MultivariateIndividual(Individual):
     minIntersectionTime = None
     maxIntersectionTime = None
 
+    minNorthGreenRatio = None
+
     def __init__(self):
         self.state = [[] for j in range(3)]
 
@@ -66,10 +68,10 @@ class MultivariateIndividual(Individual):
                 self.state[k][i] = tmp
 
             # north green ratio limits
-            if self.state[0][i] > 1: self.state[0][i] = 1
-            if self.state[0][i] < 0: self.state[0][i] = 0
-            if other.state[0][i] > 1: other.state[0][i] = 1
-            if other.state[0][i] < 0: other.state[0][i] = 0
+            if self.state[0][i] > 1-self.minNorthGreenRatio: self.state[0][i] = 1-self.minNorthGreenRatio
+            if self.state[0][i] < self.minNorthGreenRatio: self.state[0][i] = self.minNorthGreenRatio
+            if other.state[0][i] > 1-self.minNorthGreenRatio: other.state[0][i] = 1-self.minNorthGreenRatio
+            if other.state[0][i] < self.minNorthGreenRatio: other.state[0][i] = self.minNorthGreenRatio
 
             # intersection time limits
             if self.state[1][i] > self.maxIntersectionTime:
@@ -99,8 +101,8 @@ class MultivariateIndividual(Individual):
 
         for i in range(self.nLength):
             self.state[0][i] = self.state[0][i] + self.mutRate[0] * self.normprng.normalvariate(0, 1)
-            if self.state[0][i] > 1: self.state[0][i] = 1
-            if self.state[0][i] < 0: self.state[0][i] = 0
+            if self.state[0][i] > 1-self.minNorthGreenRatio: self.state[0][i] = 1-self.minNorthGreenRatio
+            if self.state[0][i] < self.minNorthGreenRatio: self.state[0][i] = self.minNorthGreenRatio
 
             self.state[1][i] = self.state[1][i] + \
                                (self.maxIntersectionTime - self.minIntersectionTime) * self.mutRate[1] \
