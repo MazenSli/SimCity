@@ -123,7 +123,7 @@ def ev3(cfg, intersections, streets):
     # print initial pop stats
     printStats(population, 0)
 
-    cars = generateCars(streets, 60)
+    cars = generateCars(streets, 120)
     #original_car_positions = []
     #for car in cars:
     #    original_car_positions.append(car.position)
@@ -131,7 +131,7 @@ def ev3(cfg, intersections, streets):
     # evolution main loop
     for i in range(cfg.generationCount):
 
-        simTime = 1500
+        simTime = 1200
         TrafficLightExp.simTime = simTime
 
         for ind in population:
@@ -148,9 +148,9 @@ def ev3(cfg, intersections, streets):
             #setLightParams(intersections, [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]])
             simulateTraffic(intersections, cars_ind, simTime)
             c = 0
-            for k in cars_ind:
-                c += 1
-                print('idleTime of car', c, ':', k.idleTime)
+#            for k in cars_ind:
+#                c += 1
+#                print('idleTime of car', c, ':', k.idleTime)
             ind.setIdleTimes(cars_ind)
 
             for car in cars_ind:

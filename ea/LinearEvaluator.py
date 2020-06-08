@@ -1,7 +1,7 @@
 import math
 
 
-class TrafficLightExp:
+class TrafficLightExpLin:
     A = None
     simTime = None
 
@@ -10,6 +10,6 @@ class TrafficLightExp:
         fitness = 0
 
         for i in range(len(idleTimes)):
-            fitness += (cls.simTime / (idleTimes[i] + 1/cls.simTime))
+            fitness += (cls.simTime - idleTimes[i])
 
         return fitness * cls.A
