@@ -76,8 +76,8 @@ def createExampleMap(intersections, i_mat):
     for d in range(len(intersections)):
         dict_inter[intersections[d]] = intersections[d].directions
 
-    street_length_min = 100
-    street_length_max = 200
+    street_length_min = 19
+    street_length_max = 20
 
     N_columns = 5
     N_rows = 3
@@ -149,6 +149,7 @@ def generateCars(streets, N_cars=800):
         newCar_position = lane.blocks[randrange(1, len(lane.blocks) - 1)]
         if newCar_position.car:
             # this is not a good design but we don't really have to worry about it, since this "if" very unlikely...
+            print('occupied')
             continue
         newCar = Car(newCar_position)
         cars.append(newCar)
@@ -163,7 +164,7 @@ def setLightParams(intersections, state):
         intersections[i].set_lights(state[0][i], state[1][i], state[2][i])
 
 
-def simulateTraffic(intersections, cars, simTime=60):
+def simulateTraffic(intersections, cars, simTime=500):
     timeCounter = 0
 
     while timeCounter < simTime:
