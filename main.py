@@ -16,6 +16,8 @@ from ea.ev3 import EV3_Config, ev3
 def main(argv=None):
     if argv is None:
         argv = sys.argv
+
+        sys.setrecursionlimit(10000)
         
 #        I1 = Intersection(name='Shilin')
 #        I2 = Intersection(name='Zhongshan')
@@ -41,7 +43,7 @@ def main(argv=None):
         streets = createMap([I1, I2, I3, I4, I5])
 
         intersections = [I1, I2, I3, I4, I5]
-        nLength = len(intersections) * 3
+        nLength = len(intersections)
 
         for i in intersections:
             print(i)
@@ -51,13 +53,13 @@ def main(argv=None):
                     print(lane)
 
         # Get EV3 config params
-        #cfg = EV3_Config('ea/my_params.cfg', nLength)
+        cfg = EV3_Config('ea/my_params.cfg', nLength)
 
         # print config params
-        #print(cfg)
+        print(cfg)
 
         # run EV3
-        #ev3(cfg, intersections)
+        ev3(cfg, intersections, streets)
 
 
 if __name__ == '__main__':

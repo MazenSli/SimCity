@@ -6,6 +6,7 @@ from modules.Block import Block
 from modules.IntersectionBlock import IntersectionBlock
 from random import randrange
 
+
 class Intersection:
     #
     # Intersection class
@@ -18,9 +19,11 @@ class Intersection:
         self.time_counter = 0
         self.streets = []
         self.north_greenRatio = 0.5
-        self.intersectionTime = 250  #400
-        self.toggleShift = randrange(0, self.intersectionTime*self.north_greenRatio+1)  # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
-        self.timer = int(self.intersectionTime*self.north_greenRatio) - self.toggleShift
+        self.intersectionTime = 250  # 400
+        self.toggleShift = randrange(0,
+                                     self.intersectionTime * self.north_greenRatio + 1)
+        # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
+        self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
         self.N_connections = N_connections
         self.directions = None
         self.intersectionEntranceBlocks = None
@@ -55,7 +58,8 @@ class Intersection:
         else:
             red_green_init = False
 
-        self.intersectionEntranceBlocks = {     # todo: BlockType und relatedIntersection wurden zu testzwecken eingeführt und sind eventuell unnötig
+        self.intersectionEntranceBlocks = {
+            # todo: BlockType und relatedIntersection wurden zu testzwecken eingeführt und sind eventuell unnötig
             'north': IntersectionBlock(red_green_init, blockType='roadEnd', relatedIntersection=self),
             'east': IntersectionBlock(not red_green_init, blockType='roadEnd', relatedIntersection=self),
             'south': IntersectionBlock(red_green_init, blockType='roadEnd', relatedIntersection=self),
@@ -147,16 +151,24 @@ class Intersection:
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             iBlock.toggle_light()
 
-    def process_intersection(self):     # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
+    def set_lights(self, north_greenRatio, intersectionTime, toggleShift):
+        self.time_counter = 0
+        self.north_greenRatio = north_greenRatio
+        self.intersectionTime = intersectionTime
+        self.toggleShift = toggleShift
+        self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
+
+    def process_intersection(
+            self):  # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
         if self.timer <= 0:
             if 'north' in self.intersectionEntranceBlocks.keys():
                 if self.intersectionEntranceBlocks['north'].isGreen:
-                    self.timer = (1-self.north_greenRatio)*self.intersectionTime
+                    self.timer = (1 - self.north_greenRatio) * self.intersectionTime
                 else:
                     self.timer = self.north_greenRatio * self.intersectionTime
             else:
                 if self.intersectionEntranceBlocks['south'].isGreen:
-                    self.timer = (1-self.north_greenRatio)*self.intersectionTime
+                    self.timer = (1 - self.north_greenRatio) * self.intersectionTime
                 else:
                     self.timer = self.north_greenRatio * self.intersectionTime
             self.toggle_lights()
@@ -176,31 +188,35 @@ class Intersection:
             # traffic light is green and there is no care in nextBlock
             # ...now we want to turn left..
             if iBlock.car.nextTurn == 'left':
-                if direction == 'north':    # todo: before continuing we have to make sure ...[south] does exist!
+                if direction == 'north':  # todo: before continuing we have to make sure ...[south] does exist!
                     if self.missing_dir is not 'south':
-                        if self.intersectionEntranceBlocks['south'].car:    # opposite side has a car
-                            if self.intersectionEntranceBlocks['south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                        if self.intersectionEntranceBlocks['south'].car:  # opposite side has a car
+                            if self.intersectionEntranceBlocks[
+                                'south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
                                 continue
 
                 elif direction == 'east':
                     if self.missing_dir is not 'west':
-                        if self.intersectionEntranceBlocks['west'].car:     # opposite side has a car
-                            if self.intersectionEntranceBlocks['west'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                        if self.intersectionEntranceBlocks['west'].car:  # opposite side has a car
+                            if self.intersectionEntranceBlocks[
+                                'west'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
                                 continue
 
                 elif direction == 'south':
                     if self.missing_dir is not 'north':
-                        if self.intersectionEntranceBlocks['north'].car:    # opposite side has a car
-                            if self.intersectionEntranceBlocks['north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                        if self.intersectionEntranceBlocks['north'].car:  # opposite side has a car
+                            if self.intersectionEntranceBlocks[
+                                'north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
                                 continue
 
                 elif direction == 'west':
                     if self.missing_dir is not 'east':
-                        if self.intersectionEntranceBlocks['east'].car:     # opposite side has a car
-                            if self.intersectionEntranceBlocks['east'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                        if self.intersectionEntranceBlocks['east'].car:  # opposite side has a car
+                            if self.intersectionEntranceBlocks[
+                                'east'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
                                 continue
 
