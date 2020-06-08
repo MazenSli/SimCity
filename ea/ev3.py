@@ -12,11 +12,12 @@
 #
 
 import yaml
-
+from copy import deepcopy
 from random import Random
+
 from ea.Population import *
 from ea.Evaluator import *
-from modules.MapFunctions import generateCars, simulateTraffic, setTrafficLightParameters
+from modules.MapFunctions import generateCars, simulateTraffic, setLightParams
 
 
 # EV3 Config class
@@ -31,8 +32,8 @@ class EV3_Config:
                'randomSeed': (int, True),
                'crossoverFraction': (float, True),
                'trafficLightA': (float, False),
-               'minLimit': (float, False),
-               'maxLimit': (float, False)}
+               'minIntersectionTime': (float, False),
+               'maxIntersectionTime': (float, False)}
 
     # constructor
     def __init__(self, inFileName, nLength):
@@ -41,7 +42,8 @@ class EV3_Config:
         ymlcfg = yaml.safe_load(infile)
         infile.close()
         eccfg = ymlcfg.get(self.sectionName, None)
-        if eccfg is None: raise Exception('Missing {} section in cfg file'.format(self.sectionName))
+        if eccfg is None:
+            raise Exception('Missing {} section in cfg file'.format(self.sectionName))
 
         # number of traffic light parameters
         self.nLength = nLength
@@ -89,7 +91,7 @@ def printStats(pop, gen):
 
 # EV3:
 #            
-def ev3(cfg, intersections):
+def ev3(cfg, intersections, streets):
     # start random number generators
     uniprng = Random()
     uniprng.seed(cfg.randomSeed)
@@ -104,11 +106,13 @@ def ev3(cfg, intersections):
     Population.crossoverFraction = cfg.crossoverFraction
 
     TrafficLightExp.A = cfg.trafficLightA
-    MultivariateIndividual.minLimit = cfg.minLimit
-    MultivariateIndividual.maxLimit = cfg.maxLimit
-    MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
+
     MultivariateIndividual.nLength = cfg.nLength
+    MultivariateIndividual.minIntersectionTime = cfg.minIntersectionTime
+    MultivariateIndividual.maxIntersectionTime = cfg.maxIntersectionTime
+    MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
     MultivariateIndividual.learningRate = 1.0 / math.sqrt(cfg.nLength)
+
     Population.individualType = MultivariateIndividual
 
     # create initial Population (random initialization)
@@ -120,11 +124,21 @@ def ev3(cfg, intersections):
     # evolution main loop
     for i in range(cfg.generationCount):
 
-        cars = generateCars(intersections)
+        cars = generateCars(streets, 60)
+        simTime = 60
+        TrafficLightExp.simTime = simTime
 
         for ind in population:
-            setTrafficLightParameters(intersections, ind.state)
-            simulateTraffic(intersections, cars)
+            cars_ind = deepcopy(cars)
+
+            setLightParams(intersections, ind.state)
+            simulateTraffic(intersections, cars_ind, simTime)
+
+            ind.setIdleTimes(cars_ind)
+            for car in cars_ind:
+                car.position.remove_car()
+            for car in cars:
+                car.position.remove_car()
 
         # create initial offspring population by copying parent pop
         offspring = population.copy()

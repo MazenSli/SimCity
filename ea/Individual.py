@@ -20,16 +20,19 @@ class Individual:
     fitFunc = None
 
     def __init__(self):
+        self.idleTimes = []
         self.fit = self.__class__.fitFunc(self.idleTimes)
-        self.mutRate = self.uniprng.uniform(0.9, 0.1)  # use "normalized" sigma
+        self.mutRate = [self.uniprng.uniform(0.9, 0.1) for k in range(3)]  # use "normalized" sigma
 
     def mutateMutRate(self):
-        self.mutRate = self.mutRate * math.exp(self.learningRate * self.normprng.normalvariate(0, 1))
-        if self.mutRate < self.minMutRate: self.mutRate = self.minMutRate
-        if self.mutRate > self.maxMutRate: self.mutRate = self.maxMutRate
+        for k in range(3):
+            self.mutRate[k] = self.mutRate[k] * math.exp(self.learningRate * self.normprng.normalvariate(0, 1))
+            if self.mutRate[k] < self.minMutRate: self.mutRate[k] = self.minMutRate
+            if self.mutRate[k] > self.maxMutRate: self.mutRate[k] = self.maxMutRate
 
     def evaluateFitness(self):
-        if self.fit == None: self.fit = self.__class__.fitFunc(self.idleTimes)
+        if self.fit is None:
+            self.fit = self.__class__.fitFunc(self.idleTimes)
 
 
 # Multivariate real representation class
@@ -39,30 +42,54 @@ class MultivariateIndividual(Individual):
     MultivariateIndividual
     """
     nLength = None
-    minLimit = None
-    maxLimit = None
+    minIntersectionTime = None
+    maxIntersectionTime = None
 
     def __init__(self):
-        self.state = []
-        self.idleTimes = []
+        self.state = [[] for j in range(3)]
+
         for i in range(self.nLength):
-            self.state.append(self.uniprng.uniform(self.minLimit, self.maxLimit))
+            self.state[0].append(self.uniprng.uniform(0, 1))
+            self.state[1].append(self.uniprng.uniform(self.minIntersectionTime, self.maxIntersectionTime))
+            self.state[2].append(self.uniprng.uniform(0, self.state[0][i] * self.state[1][i]))
 
         super().__init__()  # call base class ctor
 
     def crossover(self, other):
         # perform crossover "in-place"
-        alpha = self.uniprng.random()
+        alpha = [self.uniprng.random() for i in range(3)]
 
         for i in range(self.nLength):
-            tmp = self.state[i] * alpha + other.state[i] * (1 - alpha)
-            other.state[i] = self.state[i] * (1 - alpha) + other.state[i] * alpha
-            self.state[i] = tmp
+            for k in range(3):
+                tmp = self.state[k][i] * alpha[k] + other.state[k][i] * (1 - alpha[k])
+                other.state[k][i] = self.state[k][i] * (1 - alpha[k]) + other.state[k][i] * alpha[k]
+                self.state[k][i] = tmp
 
-            if self.state[i] > self.maxLimit: self.state[i] = self.maxLimit
-            if self.state[i] < self.minLimit: self.state[i] = self.minLimit
-            if other.state[i] > self.maxLimit: other.state[i] = self.maxLimit
-            if other.state[i] < self.minLimit: other.state[i] = self.minLimit
+            # north green ratio limits
+            if self.state[0][i] > 1: self.state[0][i] = 1
+            if self.state[0][i] < 0: self.state[0][i] = 0
+            if other.state[0][i] > 1: other.state[0][i] = 1
+            if other.state[0][i] < 0: other.state[0][i] = 0
+
+            # intersection time limits
+            if self.state[1][i] > self.maxIntersectionTime:
+                self.state[1][i] = self.maxIntersectionTime
+            if self.state[1][i] < self.minIntersectionTime:
+                self.state[1][i] = self.minIntersectionTime
+            if other.state[1][i] > self.maxIntersectionTime:
+                other.state[1][i] = self.maxIntersectionTime
+            if other.state[1][i] < self.minIntersectionTime:
+                other.state[1][i] = self.minIntersectionTime
+
+            # toggle shift limits
+            if self.state[2][i] > self.state[0][i] * self.state[1][i]:
+                self.state[2][i] = self.state[0][i] * self.state[1][i]
+            if self.state[2][i] < 0:
+                self.state[2][i] = 0
+            if other.state[2][i] > self.state[0][i] * self.state[1][i]:
+                other.state[2][i] = self.state[0][i] * self.state[1][i]
+            if other.state[2][i] < 0:
+                other.state[2][i] = 0
 
         self.fit = None
         other.fit = None
@@ -71,15 +98,43 @@ class MultivariateIndividual(Individual):
         self.mutateMutRate()  # update mutation rate
 
         for i in range(self.nLength):
-            self.state[i] = self.state[i] + (
-                        self.maxLimit - self.minLimit) * self.mutRate * self.normprng.normalvariate(0, 1)
-            if self.state[i] > self.maxLimit: self.state[i] = self.maxLimit
-            if self.state[i] < self.minLimit: self.state[i] = self.minLimit
+            self.state[0][i] = self.state[0][i] + self.mutRate[0] * self.normprng.normalvariate(0, 1)
+            if self.state[0][i] > 1: self.state[0][i] = 1
+            if self.state[0][i] < 0: self.state[0][i] = 0
+
+            self.state[1][i] = self.state[1][i] + \
+                               (self.maxIntersectionTime - self.minIntersectionTime) * self.mutRate[1] \
+                               * self.normprng.normalvariate(0, 1)
+            if self.state[1][i] > self.maxIntersectionTime:
+                self.state[1][i] = self.maxIntersectionTime
+            if self.state[1][i] < self.minIntersectionTime:
+                self.state[1][i] = self.minIntersectionTime
+
+            self.state[2][i] = self.state[2][i] + \
+                               (self.state[0][i] * self.state[1][i] - 0) * self.mutRate[2] \
+                               * self.normprng.normalvariate(0, 1)
+            if self.state[2][i] > self.state[0][i] * self.state[1][i]:
+                self.state[2][i] = self.state[0][i] * self.state[1][i]
+            if self.state[2][i] < 0:
+                self.state[2][i] = 0
 
         self.fit = None
 
     def evaluateFitness(self):
-        if self.fit == None: self.fit = self.__class__.fitFunc(self.state)
+        if self.fit is None:
+            self.fit = self.__class__.fitFunc(self.idleTimes)
+
+    def setIdleTimes(self, cars):
+        self.idleTimes = []
+        for car in cars:
+            self.idleTimes.append(car.idleTime)
+        # update fitness values
+        self.fit = self.__class__.fitFunc(self.idleTimes)
 
     def __str__(self):
-        return str(self.state) + '\t' + '%0.8e' % self.fit + '\t' + '%0.8e' % self.mutRate
+        str_ind = ''
+        params = ['NorthGreenRatio', 'IntersectionTime', 'ToggleTime']
+        for k in range(len(params)):
+            str_ind += '\t' + params[k] + ': ' + str(self.state[k]) + '\t' + \
+                      '%0.8e' % self.fit + '\t' + '%0.8e' % self.mutRate[k]
+        return str_ind
