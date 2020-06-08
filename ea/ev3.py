@@ -12,12 +12,15 @@
 #
 
 import yaml
-import copy
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
 from random import Random
+import matplotlib.pyplot as plt
 
 from ea.Population import *
 from ea.Evaluator import *
 from modules.MapFunctions import generateCars, simulateTraffic, setLightParams
+
 
 # EV3 Config class
 class EV3_Config:
@@ -123,14 +126,19 @@ def ev3(cfg, intersections, streets):
     # print initial pop stats
     printStats(population, 0)
 
-    cars = generateCars(streets, 60)
-    #original_car_positions = []
-    #for car in cars:
+    cars = generateCars(streets, 120)
+    # original_car_positions = []
+    # for car in cars:
     #    original_car_positions.append(car.position)
 
     # evolution main loop
-    for i in range(cfg.generationCount):
 
+    X = np.arange(0, cfg.generationCount)
+    bestFit = np.arange(0, cfg.generationCount)
+    Y = np.arange(0, cfg.populationSize)
+    Z = np.zeros((len(Y), len(X)))
+
+    for i in range(cfg.generationCount):
         simTime = 1500
         TrafficLightExp.simTime = simTime
 
@@ -145,7 +153,6 @@ def ev3(cfg, intersections, streets):
                 car_ind.position.set_car(car_ind)
 
             setLightParams(intersections, ind.state)
-            #setLightParams(intersections, [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]])
             simulateTraffic(intersections, cars_ind, simTime)
             c = 0
             for k in cars_ind:
@@ -156,6 +163,13 @@ def ev3(cfg, intersections, streets):
             for car in cars_ind:
                 car.position.remove_car()
 
+        maxval = population[0].fit
+        for p in range(len(population)):
+            Z[p][i] = population[p].fit
+            if population[p].fit > maxval:
+                maxval = population[p].fit
+
+        bestFit[i] = maxval
 
         # create initial offspring population by copying parent pop
         offspring = population.copy()
@@ -178,4 +192,20 @@ def ev3(cfg, intersections, streets):
 
         # print population stats
         printStats(population, i + 1)
+
+    f = plt.figure(0)
+    ax = f.add_subplot(111, projection='3d')
+    Xp, Yp = np.meshgrid(X, Y)
+    ax.plot_surface(Xp, Yp, Z)
+    ax.set_title('EA Traffic simulation')
+    ax.set_xlabel('Generation count')
+    ax.set_ylabel('Population')
+    ax.set_zlabel('Fitness')
+
+    plt.figure(1)
+    plt.plot(X, bestFit)
+    plt.title('EA Traffic simulation')
+    plt.xlabel('Generation count')
+    plt.ylabel('Best Fitness')
+    plt.show()
 
