@@ -91,8 +91,7 @@ def printStats(pop, gen):
     print('Max fitness', maxval)
     print('MutRate', mutRate)
     print('Avg fitness', avgval / len(pop))
-    print('Max Value State ' + str(maxvalState[0]) + '\t' +
-          str(maxvalState[1]) + '\t' + str(maxvalState[2]) + '\t')
+    print('Max Value State ' + str(maxvalState[0]) + '\t' + str(maxvalState[1]) + '\t')
     print('')
 
 

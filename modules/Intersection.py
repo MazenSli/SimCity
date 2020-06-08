@@ -19,7 +19,7 @@ class Intersection:
         self.time_counter = 0
         self.streets = []
         self.north_greenRatio = 0.5
-        self.intersectionTime = 0  # 250
+        self.intersectionTime = 40  # 250
         self.toggleShift = randrange(0,
                                      self.intersectionTime * self.north_greenRatio + 1)
         # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
@@ -151,9 +151,8 @@ class Intersection:
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             iBlock.toggle_light()
 
-    def set_lights(self, north_greenRatio, intersectionTime, toggleShift):
+    def set_lights(self, north_greenRatio, toggleShift):
         self.north_greenRatio = north_greenRatio
-        self.intersectionTime = intersectionTime
         self.toggleShift = toggleShift
         self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
 

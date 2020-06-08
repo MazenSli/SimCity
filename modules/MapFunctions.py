@@ -161,7 +161,7 @@ def generateCars(streets, N_cars=800):
 
 def setLightParams(intersections, state):
     for i in range(len(intersections)):
-        intersections[i].set_lights(state[0][i], state[1][i], state[2][i])
+        intersections[i].set_lights(state[0][i], state[1][i])
 
 
 def simulateTraffic(intersections, cars, simTime=500):
