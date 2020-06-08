@@ -44,14 +44,13 @@ class MultivariateIndividual(Individual):
     nLength = None
     minIntersectionTime = None
     maxIntersectionTime = None
-
     minNorthGreenRatio = None
 
     def __init__(self):
         self.state = [[] for j in range(3)]
 
         for i in range(self.nLength):
-            self.state[0].append(self.uniprng.uniform(0, 1))
+            self.state[0].append(self.uniprng.uniform(self.minNorthGreenRatio, 1-self.minNorthGreenRatio))
             self.state[1].append(self.uniprng.uniform(self.minIntersectionTime, self.maxIntersectionTime))
             self.state[2].append(self.uniprng.uniform(0, self.state[0][i] * self.state[1][i]))
 
@@ -100,7 +99,8 @@ class MultivariateIndividual(Individual):
         self.mutateMutRate()  # update mutation rate
 
         for i in range(self.nLength):
-            self.state[0][i] = self.state[0][i] + self.mutRate[0] * self.normprng.normalvariate(0, 1)
+            self.state[0][i] = self.state[0][i] + ((1-self.minNorthGreenRatio) - self.minNorthGreenRatio) *\
+                               self.mutRate[0] * self.normprng.normalvariate(0, 1)
             if self.state[0][i] > 1-self.minNorthGreenRatio: self.state[0][i] = 1-self.minNorthGreenRatio
             if self.state[0][i] < self.minNorthGreenRatio: self.state[0][i] = self.minNorthGreenRatio
 

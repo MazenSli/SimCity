@@ -78,17 +78,21 @@ def printStats(pop, gen):
     print('Generation:', gen)
     avgval = 0
     maxval = pop[0].fit
+    maxvalState = pop[0].state
     mutRate = pop[0].mutRate
     for ind in pop:
         avgval += ind.fit
         if ind.fit > maxval:
             maxval = ind.fit
+            maxvalState = ind.state
             mutRate = ind.mutRate
         print(ind)
 
     print('Max fitness', maxval)
     print('MutRate', mutRate)
     print('Avg fitness', avgval / len(pop))
+    print('Max Value State ' + str(maxvalState[0]) + '\t' +
+          str(maxvalState[1]) + '\t' + str(maxvalState[2]) + '\t')
     print('')
 
 
@@ -157,7 +161,7 @@ def ev3(cfg, intersections, streets):
             c = 0
             for k in cars_ind:
                 c += 1
-                print('idleTime of car', c, ':', k.idleTime)
+                # print('idleTime of car', c, ':', k.idleTime)
             ind.setIdleTimes(cars_ind)
 
             for car in cars_ind:
