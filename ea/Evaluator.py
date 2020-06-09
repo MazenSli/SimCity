@@ -27,6 +27,7 @@ class TrafficLightLin:
 
         return fitness * cls.A
 
+
 class TrafficLightSimple:
     A = 1
     simTime = None
@@ -37,3 +38,4 @@ class TrafficLightSimple:
         fitness = 1/np.mean(np.array(idleTimes))
 
         return fitness * cls.A
+
