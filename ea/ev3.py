@@ -97,7 +97,7 @@ def printStats(pop, gen):
     print('MutRate', mutRate)
     print('Avg fitness', avgval / len(pop))
     print('Max Value State ' + str(maxvalState[0]) + '\t' +
-          str(maxvalState[1]) + '\t' + str(maxvalState[2]) + '\t')
+          str(maxvalState[1]))
     print('Avg idleTime:', np.nanmean(np.array(best_individual.idleTimes)))
     print('')
 
