@@ -34,6 +34,7 @@ class EV3_Config:
                'randomSeed': (int, True),
                'crossoverFraction': (float, True),
                'trafficLightA': (float, False),
+               'evaluator': (str, False),
                'minIntersectionTime': (float, False),
                'maxIntersectionTime': (float, False),
                'minNorthGreenRatio': (float, False)}
@@ -119,7 +120,11 @@ def ev3(cfg, intersections, streets):
     MultivariateIndividual.maxIntersectionTime = cfg.maxIntersectionTime
     MultivariateIndividual.minNorthGreenRatio = cfg.minNorthGreenRatio
 
-    MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
+    if cfg.evaluator == 'trafficLightExp':
+        MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
+    else:
+        raise Exception('Evaluator not found')
+
     MultivariateIndividual.learningRate = 1.0 / math.sqrt(cfg.nLength)
 
     Population.individualType = MultivariateIndividual
