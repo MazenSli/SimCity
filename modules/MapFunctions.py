@@ -60,7 +60,7 @@ def createMap(intersections):
             inter2_dir_nr = randrange(len(dict_inter[inter2]))
             inter2_dir = dict_inter[inter2].pop(inter2_dir_nr)
 
-            length = randrange(22, 44)
+            length = randrange(20, 100)
             name = names.pop(randrange(len(names)))
 
             streets.append(Street(length=length, startIs=inter1, endIs=inter2, name=name))
@@ -76,8 +76,8 @@ def createExampleMap(intersections, i_mat):
     for d in range(len(intersections)):
         dict_inter[intersections[d]] = intersections[d].directions
 
-    street_length_min = 22
-    street_length_max = 44
+    street_length_min = 20
+    street_length_max = 100
 
     N_columns = 5
     N_rows = 3
@@ -139,7 +139,7 @@ def createExampleMap(intersections, i_mat):
     return streets
 
 
-def generateCars(streets, N_cars=800):
+def generateCars(streets, N_cars=5):
     cars = []
 
     leftCars = N_cars
@@ -149,7 +149,6 @@ def generateCars(streets, N_cars=800):
         newCar_position = lane.blocks[randrange(1, len(lane.blocks) - 1)]
         if newCar_position.car:
             # this is not a good design but we don't really have to worry about it, since this "if" very unlikely...
-            # print('occupied')
             continue
         newCar = Car(newCar_position)
         cars.append(newCar)

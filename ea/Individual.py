@@ -5,7 +5,6 @@
 
 import math
 
-
 # Base class for all individual types
 #
 class Individual:
@@ -104,8 +103,7 @@ class MultivariateIndividual(Individual):
             if self.state[0][i] > 1-self.minNorthGreenRatio: self.state[0][i] = 1-self.minNorthGreenRatio
             if self.state[0][i] < self.minNorthGreenRatio: self.state[0][i] = self.minNorthGreenRatio
 
-            self.state[1][i] = self.state[1][i] + \
-                               (self.maxIntersectionTime - self.minIntersectionTime) * self.mutRate[1] \
+            self.state[1][i] = self.state[1][i] + (self.maxIntersectionTime - self.minIntersectionTime) * self.mutRate[1] \
                                * self.normprng.normalvariate(0, 1)
             if self.state[1][i] > self.maxIntersectionTime:
                 self.state[1][i] = self.maxIntersectionTime

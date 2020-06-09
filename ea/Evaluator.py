@@ -1,4 +1,4 @@
-
+import numpy as np
 
 class TrafficLightExp:
     A = None
@@ -26,3 +26,16 @@ class TrafficLightLin:
             fitness += (cls.simTime - idleTimes[i])
 
         return fitness * cls.A
+
+
+class TrafficLightSimple:
+    A = 1
+    simTime = None
+
+    @classmethod
+    def fitnessFunc(cls, idleTimes):
+
+        fitness = 1/np.mean(np.array(idleTimes))
+
+        return fitness * cls.A
+
