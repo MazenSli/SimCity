@@ -173,11 +173,11 @@ def run(simIntersections, streets, cars, window):
             time_past = (time.perf_counter() - t0)
             # update_physics(time_past)
             t0 = time.perf_counter()
-            if time_counter >= 70:
+            if time_counter >= 2:
                 # slower event...
                 a += 1
                 print(a)
-                if a >= 1500:
+                if a >= 2000:
                     window.running = False
                 #for car in cars:
                 #    print('car position:', car.position, '   position of care hasCar? - ', car.position.car)
@@ -211,11 +211,11 @@ def visualize(intersections, streets, cars):
 
     window = WindowWrapper()
 
-    simIntersections = [SimIntersection(int(screen_width / 4), 100, intersections[0]),
-                        SimIntersection(int(3 * screen_width / 4), screen_height / 3, intersections[1]),
-                        SimIntersection(int(screen_width / 2), 3 * screen_height / 4, intersections[2]),
-                        SimIntersection(int(2 * screen_width / 4), screen_height / 6, intersections[3]),
-                        SimIntersection(int(1.5 * screen_width / 4), screen_height / 7, intersections[4])
+    simIntersections = [SimIntersection(int(1 * screen_width / 4), 1 * screen_height / 4, intersections[0]),
+                        SimIntersection(int(3 * screen_width / 4), 1 * screen_height / 4 - 150, intersections[1]),
+                        SimIntersection(int(1 * screen_width / 2), 2 * screen_height / 4, intersections[2]),
+                        SimIntersection(int(1 * screen_width / 4) - 150, 3 * screen_height / 4 - 150, intersections[3]),
+                        SimIntersection(int(3 * screen_width / 4) - 150, 3 * screen_height / 4, intersections[4])
                         ]
 
     init_setup_blockPositions(streets)
@@ -251,7 +251,7 @@ def visualize_example():
 
     intersections = [I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11]
     streets = createExampleMap(intersections, intersection_matrix)
-    cars = generateCars(streets, 200)
+    cars = generateCars(streets, 100)
 
     screen_width = 1920
     screen_height = 1080
@@ -281,7 +281,7 @@ def visualize_example():
         a.append(car.idleTime)
     print(np.mean(a))
 
-visualize_example()
+#visualize_example()
 
 '''I1 = Intersection()
 I2 = Intersection()
@@ -297,7 +297,6 @@ intersections = [I1, I2, I3, I4]
 cars = generateCars(streets)
 
 visualize(intersections, streets, cars)
-'''
 '''
 I1 = Intersection(name='1', N_connections=3)
 I2 = Intersection(name='2', N_connections=3)
@@ -320,7 +319,7 @@ streets = createMap([I1, I2, I3, I4, I5])
 intersections = [I1, I2, I3, I4, I5]
 nLength = len(intersections)
 
-cars = generateCars(streets, 60)
+cars = generateCars(streets, 100)
 visualize(intersections, streets, cars)
 
 a = []
@@ -329,4 +328,4 @@ for car in cars:
     i += 1
     print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
     a.append(car.idleTime)
-print(np.mean(np.array(a)))'''
+print(np.mean(np.array(a)))
