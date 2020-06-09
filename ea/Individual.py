@@ -12,7 +12,7 @@ class Individual:
     Individual
     """
     minMutRate = 1e-100
-    maxMutRate = 3
+    maxMutRate = 1
     learningRate = None
     uniprng = None
     normprng = None
@@ -103,7 +103,7 @@ class MultivariateIndividual(Individual):
             if self.state[0][i] > 1-self.minNorthGreenRatio: self.state[0][i] = 1-self.minNorthGreenRatio
             if self.state[0][i] < self.minNorthGreenRatio: self.state[0][i] = self.minNorthGreenRatio
 
-            self.state[1][i] = self.state[1][i] + 3 * self.mutRate[1] \
+            self.state[1][i] = self.state[1][i] + (self.maxIntersectionTime - self.minIntersectionTime) * self.mutRate[1] \
                                * self.normprng.normalvariate(0, 1)
             if self.state[1][i] > self.maxIntersectionTime:
                 self.state[1][i] = self.maxIntersectionTime
