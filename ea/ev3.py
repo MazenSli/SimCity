@@ -99,7 +99,8 @@ def printStats(pop, gen):
     print('Avg fitness', avgval / len(pop))
     print('Max Value State ' + str(maxvalState[0]) + '\t' +
           str(maxvalState[1]) + '\t' + str(maxvalState[2]) + '\t')
-    print('Avg idleTime:', np.mean(np.array(best_individual.idleTimes)))
+    if gen != 0:
+        print('Avg idleTime:', np.nanmean(np.array(best_individual.idleTimes)))
     print('')
 
 
@@ -120,6 +121,7 @@ def ev3(cfg, intersections, streets):
     Population.crossoverFraction = cfg.crossoverFraction
 
     TrafficLightExp.A = cfg.trafficLightA
+    TrafficLightLin.A = cfg.trafficLightA
 
     MultivariateIndividual.nLength = cfg.nLength
     MultivariateIndividual.minIntersectionTime = cfg.minIntersectionTime
@@ -128,6 +130,8 @@ def ev3(cfg, intersections, streets):
 
     if cfg.evaluator == 'trafficLightExp':
         MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
+    elif cfg.evaluator == 'trafficLightLin':
+        MultivariateIndividual.fitFunc = TrafficLightLin.fitnessFunc
     else:
         raise Exception('Evaluator not found')
 
@@ -151,6 +155,7 @@ def ev3(cfg, intersections, streets):
     for i in range(cfg.generationCount):
         simTime = 2000
         TrafficLightExp.simTime = simTime
+        TrafficLightLin.simTime = simTime
 
         for ind in population:
 

@@ -149,7 +149,7 @@ def generateCars(streets, N_cars=800):
         newCar_position = lane.blocks[randrange(1, len(lane.blocks) - 1)]
         if newCar_position.car:
             # this is not a good design but we don't really have to worry about it, since this "if" very unlikely...
-            print('occupied')
+            # print('occupied')
             continue
         newCar = Car(newCar_position)
         cars.append(newCar)
