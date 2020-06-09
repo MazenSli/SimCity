@@ -34,6 +34,7 @@ class EV3_Config:
                'randomSeed': (int, True),
                'crossoverFraction': (float, True),
                'trafficLightA': (float, False),
+               'evaluator': (str, False),
                'minIntersectionTime': (float, False),
                'maxIntersectionTime': (float, False),
                'minNorthGreenRatio': (float, False)}
@@ -86,7 +87,6 @@ def printStats(pop, gen):
         i += 1
         avgval += ind.fit
         if ind.fit > maxval:  # the elements were sorted to begin with, so this will never be the case
-            print('THIS PRINT WILL NEVER HAPPEN')
             maxval = ind.fit
             best_individual = ind
             maxvalState = ind.state
@@ -98,7 +98,7 @@ def printStats(pop, gen):
     print('Avg fitness', avgval / len(pop))
     print('Max Value State ' + str(maxvalState[0]) + '\t' +
           str(maxvalState[1]) + '\t' + str(maxvalState[2]) + '\t')
-    print('Avg idleTime:', np.mean(np.array(best_individual.idleTimes)))
+    print('Avg idleTime:', np.nanmean(np.array(best_individual.idleTimes)))
     print('')
 
 
@@ -119,22 +119,26 @@ def ev3(cfg, intersections, streets):
     Population.crossoverFraction = cfg.crossoverFraction
 
     TrafficLightExp.A = cfg.trafficLightA
+    TrafficLightLin.A = cfg.trafficLightA
 
     MultivariateIndividual.nLength = cfg.nLength
     MultivariateIndividual.minIntersectionTime = cfg.minIntersectionTime
     MultivariateIndividual.maxIntersectionTime = cfg.maxIntersectionTime
     MultivariateIndividual.minNorthGreenRatio = cfg.minNorthGreenRatio
 
-    MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
+    if cfg.evaluator == 'trafficLightExp':
+        MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
+    elif cfg.evaluator == 'trafficLightLin':
+        MultivariateIndividual.fitFunc = TrafficLightLin.fitnessFunc
+    else:
+        raise Exception('Evaluator not found')
+
     MultivariateIndividual.learningRate = 1.0 / math.sqrt(cfg.nLength)
 
     Population.individualType = MultivariateIndividual
 
     # create initial Population (random initialization)
     population = Population(cfg.populationSize)
-
-    # print initial pop stats
-    printStats(population, 0)
 
     cars = generateCars(streets, 100)
     # evolution main loop
@@ -146,6 +150,7 @@ def ev3(cfg, intersections, streets):
     for i in range(cfg.generationCount):
         simTime = 1500
         TrafficLightExp.simTime = simTime
+        TrafficLightLin.simTime = simTime
 
         for ind in population:
 
@@ -182,6 +187,10 @@ def ev3(cfg, intersections, streets):
 
         # create initial offspring population by copying parent pop
         offspring = population.copy()
+
+        if i == 0:
+            # print initial pop stats
+            printStats(offspring, 0)
 
         # select mating pool
         offspring.conductTournament()
