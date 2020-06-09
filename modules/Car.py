@@ -23,6 +23,7 @@ class Car:
         self.idleTime = 0
         self.nextTurn = 'straight'
         self.isProcessed = False
+        self.moveTimes = 0
 
     def set_nextTurn(self):
         randNum = random.random()
@@ -57,7 +58,7 @@ class Car:
         self.idleTime += 1
 
     def moveToNextBlock(self):
-
+        self.moveTimes += 1
         self.position.remove_car()
         if type(self.position) == IntersectionBlock:
             self.position.nextBlock[self.nextTurn].set_car(self)

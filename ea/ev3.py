@@ -86,7 +86,7 @@ def printStats(pop, gen):
         i += 1
         avgval += ind.fit
         if ind.fit > maxval:  # the elements were sorted to begin with, so this will never be the case
-            printStats('THIS PRINT WILL NEVER HAPPEN')
+            print('THIS PRINT WILL NEVER HAPPEN')
             maxval = ind.fit
             best_individual = ind
             maxvalState = ind.state
@@ -144,7 +144,7 @@ def ev3(cfg, intersections, streets):
     Z = np.zeros((len(Y), len(X)))
 
     for i in range(cfg.generationCount):
-        simTime = 2000
+        simTime = 1500
         TrafficLightExp.simTime = simTime
 
         for ind in population:
@@ -160,9 +160,12 @@ def ev3(cfg, intersections, streets):
             setLightParams(intersections, ind.state)
             simulateTraffic(intersections, cars_ind, simTime)
 
-#            for k in cars_ind:
-#                c += 1
-#                print('idleTime of car', c, ':', k.idleTime)
+            #c = 0
+            #for k in cars_ind:
+            #    c += 1
+            #    print('idleTime of car', c, ':', k.idleTime)
+            #    print('moveTime of car', c, ':', k.moveTimes)
+            #print()
 
             ind.setIdleTimes(cars_ind)
 
