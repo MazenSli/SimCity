@@ -130,6 +130,8 @@ def ev3(cfg, intersections, streets):
         MultivariateIndividual.fitFunc = TrafficLightExp.fitnessFunc
     elif cfg.evaluator == 'trafficLightLin':
         MultivariateIndividual.fitFunc = TrafficLightLin.fitnessFunc
+    elif cfg.evaluator == 'trafficLightSimple':
+        MultivariateIndividual.fitFunc = TrafficLightSimple.fitnessFunc
     else:
         raise Exception('Evaluator not found')
 
@@ -140,7 +142,7 @@ def ev3(cfg, intersections, streets):
     # create initial Population (random initialization)
     population = Population(cfg.populationSize)
 
-    cars = generateCars(streets, 100)
+    cars = generateCars(streets, 200)
     # evolution main loop
     X = np.arange(0, cfg.generationCount)
     bestFit = np.arange(0, cfg.generationCount)
@@ -148,7 +150,7 @@ def ev3(cfg, intersections, streets):
     Z = np.zeros((len(Y), len(X)))
 
     for i in range(cfg.generationCount):
-        simTime = 1500
+        simTime = 2500
         TrafficLightExp.simTime = simTime
         TrafficLightLin.simTime = simTime
 
@@ -164,13 +166,6 @@ def ev3(cfg, intersections, streets):
 
             setLightParams(intersections, ind.state)
             simulateTraffic(intersections, cars_ind, simTime)
-
-            #c = 0
-            #for k in cars_ind:
-            #    c += 1
-            #    print('idleTime of car', c, ':', k.idleTime)
-            #    print('moveTime of car', c, ':', k.moveTimes)
-            #print()
 
             ind.setIdleTimes(cars_ind)
 
