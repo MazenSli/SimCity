@@ -139,7 +139,7 @@ def createExampleMap(intersections, i_mat):
     return streets
 
 
-def generateCars(streets, N_cars=800):
+def generateCars(streets, N_cars=5):
     cars = []
 
     leftCars = N_cars
@@ -149,7 +149,6 @@ def generateCars(streets, N_cars=800):
         newCar_position = lane.blocks[randrange(1, len(lane.blocks) - 1)]
         if newCar_position.car:
             # this is not a good design but we don't really have to worry about it, since this "if" very unlikely...
-            # print('occupied')
             continue
         newCar = Car(newCar_position)
         cars.append(newCar)
