@@ -148,7 +148,7 @@ def ev3(cfg, intersections, streets):
     Z = np.zeros((len(Y), len(X)))
 
     for i in range(cfg.generationCount):
-        simTime = 2000
+        simTime = 500
         TrafficLightExp.simTime = simTime
         TrafficLightLin.simTime = simTime
 
