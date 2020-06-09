@@ -47,21 +47,20 @@ class MultivariateIndividual(Individual):
     minNorthGreenRatio = None
 
     def __init__(self):
-        self.state = [[] for j in range(3)]
+        self.state = [[] for j in range(2)]
 
         for i in range(self.nLength):
             self.state[0].append(self.uniprng.uniform(self.minNorthGreenRatio, 1-self.minNorthGreenRatio))
             self.state[1].append(self.uniprng.uniform(self.minIntersectionTime, self.maxIntersectionTime))
-            self.state[2].append(self.uniprng.uniform(0, self.state[0][i] * self.state[1][i]))
 
         super().__init__()  # call base class ctor
 
     def crossover(self, other):
         # perform crossover "in-place"
-        alpha = [self.uniprng.random() for i in range(3)]
+        alpha = [self.uniprng.random() for i in range(2)]
 
         for i in range(self.nLength):
-            for k in range(3):
+            for k in range(2):
                 tmp = self.state[k][i] * alpha[k] + other.state[k][i] * (1 - alpha[k])
                 other.state[k][i] = self.state[k][i] * (1 - alpha[k]) + other.state[k][i] * alpha[k]
                 self.state[k][i] = tmp
@@ -81,16 +80,6 @@ class MultivariateIndividual(Individual):
                 other.state[1][i] = self.maxIntersectionTime
             if other.state[1][i] < self.minIntersectionTime:
                 other.state[1][i] = self.minIntersectionTime
-
-            # toggle shift limits
-            if self.state[2][i] > self.state[0][i] * self.state[1][i]:
-                self.state[2][i] = self.state[0][i] * self.state[1][i]
-            if self.state[2][i] < 0:
-                self.state[2][i] = 0
-            if other.state[2][i] > self.state[0][i] * self.state[1][i]:
-                other.state[2][i] = self.state[0][i] * self.state[1][i]
-            if other.state[2][i] < 0:
-                other.state[2][i] = 0
 
         self.fit = None
         other.fit = None
@@ -112,14 +101,6 @@ class MultivariateIndividual(Individual):
             if self.state[1][i] < self.minIntersectionTime:
                 self.state[1][i] = self.minIntersectionTime
 
-            self.state[2][i] = self.state[2][i] + \
-                               (self.state[0][i] * self.state[1][i] - 0) * self.mutRate[2] \
-                               * self.normprng.normalvariate(0, 1)
-            if self.state[2][i] > self.state[0][i] * self.state[1][i]:
-                self.state[2][i] = self.state[0][i] * self.state[1][i]
-            if self.state[2][i] < 0:
-                self.state[2][i] = 0
-
         self.fit = None
 
     def evaluateFitness(self):
@@ -135,7 +116,7 @@ class MultivariateIndividual(Individual):
 
     def __str__(self):
         str_ind = ''
-        params = ['NorthGreenRatio', 'IntersectionTime', 'ToggleTime']
+        params = ['NorthGreenRatio', 'IntersectionTime']
         for k in range(len(params)):
             str_ind += '\t' + params[k] + ': ' + str(self.state[k]) + '\t' + \
                       '%0.8e' % self.fit + '\t' + '%0.8e' % self.mutRate[k]

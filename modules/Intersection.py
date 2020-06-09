@@ -163,10 +163,10 @@ class Intersection:
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             iBlock.toggle_light()
 
-    def set_lights(self, north_greenRatio, intersectionTime, toggleShift):
+    def set_lights(self, north_greenRatio, intersectionTime):
         self.north_greenRatio = north_greenRatio
         self.intersectionTime = intersectionTime
-        self.toggleShift = toggleShift
+        self.toggleShift = 0
         if 'north' in self.intersectionEntranceBlocks.keys():
             if self.intersectionEntranceBlocks['north'].isGreen:
                 self.timer = (1 - self.north_greenRatio) * self.intersectionTime

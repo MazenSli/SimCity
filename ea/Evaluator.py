@@ -1,3 +1,4 @@
+import math
 
 
 class TrafficLightExp:
@@ -26,4 +27,3 @@ class TrafficLightLin:
             fitness += (cls.simTime - idleTimes[i])
 
         return fitness * cls.A
-
