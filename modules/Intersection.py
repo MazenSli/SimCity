@@ -4,6 +4,7 @@
 #
 from modules.Block import Block
 from modules.IntersectionBlock import IntersectionBlock
+from random import randrange
 
 
 class Intersection:
@@ -12,33 +13,73 @@ class Intersection:
     #
 
     # constructor
-    def __init__(self, name=None):
+    def __init__(self, name=None, N_connections=4, missing_dir=None):
         if name is not None:
             setattr(self, 'name', name)
+        self.DEAD_TIME = 2
+        self.dead_time_timer = 0
         self.streets = []
         self.north_greenRatio = 0.5
-        self.intersectionTime = 60
-        self.toggleShift = 0  # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
+        self.intersectionTime = 30  # 250
+        self.toggleShift = randrange(0, self.intersectionTime * self.north_greenRatio + 1)
+        # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
+        self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
+        self.N_connections = N_connections
+        self.directions = None
+        self.intersectionEntranceBlocks = None
+        self.intersectionExitBlocks = None
+        self.missing_dir = missing_dir
+        self.light_memory = None
 
-        # intersectionEntryBlocks represent the end of a road and the entrance of an Intersection.
-        # Those blocks are the only "IntersectionBlock" objects, they have to be special, because
-        # they have more than one "nextBlock"
-        self.intersectionEntranceBlocks = {     # todo: if direction exists...
-                                                # todo: BlockType und relatedIntersection wurden zu testzwecken eingeführt und sind eventuell unnötig
-            'north': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self),
-            'east': IntersectionBlock(False, blockType='roadEnd', relatedIntersection=self),
-            'south': IntersectionBlock(True, blockType='roadEnd', relatedIntersection=self),
-            'west': IntersectionBlock(False, blockType='roadEnd', relatedIntersection=self)
+        self._init_directions()
+        self._init_intersectionEntranceBlocks()
+        self._init_intersectionExitBlocks()
+        self._init_intersectionBlocks()
+
+    def _init_directions(self):
+        directions = ['north', 'east', 'south', 'west']
+        if self.N_connections == 3:
+            if self.missing_dir is None:
+                missingDir_index = randrange(0, 4)
+                self.missing_dir = directions.pop(missingDir_index)
+                self.directions = directions
+            else:
+                directions.remove(self.missing_dir)
+                self.directions = directions
+        else:
+            self.directions = directions
+
+    # intersectionEntryBlocks represent the end of a road and the entrance of an Intersection.
+    # Those blocks are the only "IntersectionBlock" objects, they have to be special, because
+    # they have more than one "nextBlock"
+    def _init_intersectionEntranceBlocks(self):
+        red_green_init = None
+        if randrange(0, 2) == 1:
+            red_green_init = True
+        else:
+            red_green_init = False
+
+        self.intersectionEntranceBlocks = {
+            # todo: BlockType und relatedIntersection wurden zu testzwecken eingeführt und sind eventuell unnötig
+            'north': IntersectionBlock(red_green_init, blockType='roadEnd', relatedIntersection=self),
+            'east': IntersectionBlock(not red_green_init, blockType='roadEnd', relatedIntersection=self),
+            'south': IntersectionBlock(red_green_init, blockType='roadEnd', relatedIntersection=self),
+            'west': IntersectionBlock(not red_green_init, blockType='roadEnd', relatedIntersection=self)
         }
-        # intersectionExitBlocks represent the entrance of a road and the exit of an Intersection.
-        # They are normal "Block" objects
-        self.intersectionExitBlocks = {  # todo: if direction exists...
+        if self.N_connections == 3:
+            self.intersectionEntranceBlocks.pop(self.missing_dir, None)
+
+    # intersectionExitBlocks represent the entrance of a road and the exit of an Intersection.
+    # They are normal "Block" objects
+    def _init_intersectionExitBlocks(self):
+        self.intersectionExitBlocks = {
             'north': Block(blockType='roadEntrance', relatedIntersection=self),
             'east': Block(blockType='roadEntrance', relatedIntersection=self),
             'south': Block(blockType='roadEntrance', relatedIntersection=self),
             'west': Block(blockType='roadEntrance', relatedIntersection=self)
         }
-        self._init_intersectionBlocks()
+        if self.N_connections == 3:
+            self.intersectionExitBlocks[self.missing_dir] = None
 
     # sets up all the nextBlocks of the IntersectionBlocks (-> "intersectionEntranceBlocks"), the nextBlocks will be
     # set in a dictionary with keys: left straight and right, representing the turns a car can perform at an inters.
@@ -49,19 +90,48 @@ class Intersection:
                 nextBlocks['left'] = self.intersectionExitBlocks['east']
                 nextBlocks['straight'] = self.intersectionExitBlocks['south']
                 nextBlocks['right'] = self.intersectionExitBlocks['west']
+                if self.missing_dir == 'east':
+                    nextBlocks.pop('left', None)
+                if self.missing_dir == 'south':
+                    nextBlocks.pop('straight', None)
+                if self.missing_dir == 'west':
+                    nextBlocks.pop('right', None)
+
             if entranceDirection == 'east':
                 nextBlocks['left'] = self.intersectionExitBlocks['south']
                 nextBlocks['straight'] = self.intersectionExitBlocks['west']
                 nextBlocks['right'] = self.intersectionExitBlocks['north']
+                if self.missing_dir == 'north':
+                    nextBlocks.pop('right', None)
+                if self.missing_dir == 'south':
+                    nextBlocks.pop('left', None)
+                if self.missing_dir == 'west':
+                    nextBlocks.pop('straight', None)
+
             if entranceDirection == 'south':
                 nextBlocks['left'] = self.intersectionExitBlocks['west']
                 nextBlocks['straight'] = self.intersectionExitBlocks['north']
                 nextBlocks['right'] = self.intersectionExitBlocks['east']
+                if self.missing_dir == 'north':
+                    nextBlocks.pop('straight', None)
+                if self.missing_dir == 'east':
+                    nextBlocks.pop('right', None)
+                if self.missing_dir == 'west':
+                    nextBlocks.pop('left', None)
+
             if entranceDirection == 'west':
                 nextBlocks['left'] = self.intersectionExitBlocks['north']
                 nextBlocks['straight'] = self.intersectionExitBlocks['east']
                 nextBlocks['right'] = self.intersectionExitBlocks['south']
+                if self.missing_dir == 'north':
+                    nextBlocks.pop('left', None)
+                if self.missing_dir == 'east':
+                    nextBlocks.pop('straight', None)
+                if self.missing_dir == 'south':
+                    nextBlocks.pop('right', None)
+
             entranceBlock.set_nextBlock(nextBlocks)
+        self.intersectionExitBlocks.pop(self.missing_dir, None)
 
     def addStreet(self, street, direction):
         if hasattr(self, direction):
@@ -78,14 +148,50 @@ class Intersection:
             self.streets.append(street)
             setattr(self, direction, street)
 
-    def set_greenRatio(self, north_greenRatio):     # todo: greenRatio von jew. diagonalen intersectionBlocks muss gleich sein, die restl. sind 1-greenRatio.
-            pass
+    # saves the traffic light status then turns it into dead_mode
+    def set_lights_deadMode(self):
+        self.light_memory = {}
+        for direction, iBlock in self.intersectionEntranceBlocks.items():
+            self.light_memory[direction] = iBlock.isGreen
+            iBlock.isGreen = False
+
+    def exit_lights_deadMode(self):
+        for direction, iBlock in self.intersectionEntranceBlocks.items():
+            iBlock.isGreen = self.light_memory[direction]
 
     def toggle_lights(self):
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             iBlock.toggle_light()
 
-    def processCars(self,):     # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
+    def set_lights(self, north_greenRatio, intersectionTime, toggleShift):
+        self.north_greenRatio = north_greenRatio
+        self.intersectionTime = intersectionTime
+        self.toggleShift = toggleShift
+        self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
+
+    def process_intersection(
+            self):  # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
+        if self.dead_time_timer == 0:
+            if self.timer == 0:
+                if 'north' in self.intersectionEntranceBlocks.keys():
+                    if self.intersectionEntranceBlocks['north'].isGreen:
+                        self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+                    else:
+                        self.timer = self.north_greenRatio * self.intersectionTime
+                else:
+                    if self.intersectionEntranceBlocks['south'].isGreen:
+                        self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+                    else:
+                        self.timer = self.north_greenRatio * self.intersectionTime
+                self.dead_time_timer = self.DEAD_TIME
+                self.set_lights_deadMode()  # turn all the traffic lights of this intersections red
+            else:
+                self.timer -= 1
+        else:
+            self.dead_time_timer -= 1
+            if self.dead_time_timer == 0:
+                self.exit_lights_deadMode()  # turn the traffic light back on how it was before the deadMode
+                self.toggle_lights()
 
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             if not iBlock.car:  # entrancBlock has no car
@@ -102,30 +208,38 @@ class Intersection:
             # ...now we want to turn left..
             if iBlock.car.nextTurn == 'left':
                 if direction == 'north':
-                    if self.intersectionEntranceBlocks['south'].car:    # opposite side has a car
-                        if self.intersectionEntranceBlocks['south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
-                            iBlock.car.increment_idleTime()
-                            continue
+                    if self.missing_dir is not 'south':
+                        if self.intersectionEntranceBlocks['south'].car:  # opposite side has a car
+                            if self.intersectionEntranceBlocks[
+                                'south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                                iBlock.car.increment_idleTime()
+                                continue
 
                 elif direction == 'east':
-                    if self.intersectionEntranceBlocks['west'].car:     # opposite side has a car
-                        if self.intersectionEntranceBlocks['west'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
-                            iBlock.car.increment_idleTime()
-                            continue
+                    if self.missing_dir is not 'west':
+                        if self.intersectionEntranceBlocks['west'].car:  # opposite side has a car
+                            if self.intersectionEntranceBlocks[
+                                'west'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                                iBlock.car.increment_idleTime()
+                                continue
 
                 elif direction == 'south':
-                    if self.intersectionEntranceBlocks['north'].car:    # opposite side has a car
-                        if self.intersectionEntranceBlocks['north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
-                            iBlock.car.increment_idleTime()
-                            continue
+                    if self.missing_dir is not 'north':
+                        if self.intersectionEntranceBlocks['north'].car:  # opposite side has a car
+                            if self.intersectionEntranceBlocks[
+                                'north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                                iBlock.car.increment_idleTime()
+                                continue
 
                 elif direction == 'west':
-                    if self.intersectionEntranceBlocks['east'].car:     # opposite side has a car
-                        if self.intersectionEntranceBlocks['north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
-                            iBlock.car.increment_idleTime()
-                            continue
+                    if self.missing_dir is not 'east':
+                        if self.intersectionEntranceBlocks['east'].car:  # opposite side has a car
+                            if self.intersectionEntranceBlocks[
+                                'east'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                                iBlock.car.increment_idleTime()
+                                continue
 
-            # either we didn't intend to turn left or the opposite side didn't have a car or opposite car also turns left -> we can go
+            # either we didn't intend to turn left or the opposite side doesn't exist or didn't have a car or opposite car also turns left -> we can go
             iBlock.car.moveToNextBlock()
 
     def checkDirection(self, direction):

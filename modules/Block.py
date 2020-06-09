@@ -16,6 +16,7 @@ class Block:
         self.nextBlock = None
         self.blockType = blockType
         self.relatedIntersection = relatedIntersection
+        self.visualizationPoint = None
 
     def set_nextBlock(self, block):         # will be called from lane
         self.nextBlock = block

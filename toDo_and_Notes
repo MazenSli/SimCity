@@ -1,0 +1,1 @@
+- Zeitmaßstab in der Visu ist nicht exakt. Ist die render function zu langsam? - bottleneck... eigentlich müsste man nicht jedesmal das gesamte straßennetz neu zeichnen, sondern nur dir Autos/Ampeln
