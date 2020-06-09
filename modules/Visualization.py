@@ -173,11 +173,11 @@ def run(simIntersections, streets, cars, window):
             time_past = (time.perf_counter() - t0)
             # update_physics(time_past)
             t0 = time.perf_counter()
-            if time_counter >= 2:
+            if time_counter >= 3:
                 # slower event...
                 a += 1
                 print(a)
-                if a >= 2000:
+                if a >= 1500:
                     window.running = False
                 #for car in cars:
                 #    print('car position:', car.position, '   position of care hasCar? - ', car.position.car)
@@ -319,7 +319,7 @@ streets = createMap([I1, I2, I3, I4, I5])
 intersections = [I1, I2, I3, I4, I5]
 nLength = len(intersections)
 
-cars = generateCars(streets, 100)
+cars = generateCars(streets, 200)
 visualize(intersections, streets, cars)
 
 a = []

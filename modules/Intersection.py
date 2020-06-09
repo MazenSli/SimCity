@@ -4,7 +4,7 @@
 #
 from modules.Block import Block
 from modules.IntersectionBlock import IntersectionBlock
-from random import randrange
+from random import randrange, uniform
 
 
 class Intersection:
@@ -20,8 +20,8 @@ class Intersection:
         self.dead_time_timer = 0
         self.streets = []
         self.north_greenRatio = 0.5
-        self.intersectionTime = 40  # 250
-        self.toggleShift = randrange(0, self.intersectionTime * self.north_greenRatio + 1)
+        self.intersectionTime = 60  # 250
+        self.toggleShift = randrange(0, int(self.intersectionTime * self.north_greenRatio + 1))
         # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
         self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
         self.N_connections = N_connections
@@ -169,30 +169,29 @@ class Intersection:
         self.toggleShift = 0
         if 'north' in self.intersectionEntranceBlocks.keys():
             if self.intersectionEntranceBlocks['north'].isGreen:
-                self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+                self.timer = int((1 - self.north_greenRatio) * self.intersectionTime)
             else:
-                self.timer = self.north_greenRatio * self.intersectionTime
+                self.timer = int(self.north_greenRatio * self.intersectionTime)
         else:
             if self.intersectionEntranceBlocks['south'].isGreen:
-                self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+                self.timer = int((1 - self.north_greenRatio) * self.intersectionTime)
             else:
-                self.timer = self.north_greenRatio * self.intersectionTime
-        #self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
+                self.timer = int(self.north_greenRatio * self.intersectionTime)
 
     def process_intersection(
             self):  # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
         if self.dead_time_timer == 0:
-            if self.timer == 0:
+            if self.timer <= 0:
                 if 'north' in self.intersectionEntranceBlocks.keys():
                     if self.intersectionEntranceBlocks['north'].isGreen:
-                        self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+                        self.timer = int((1 - self.north_greenRatio) * self.intersectionTime)
                     else:
-                        self.timer = self.north_greenRatio * self.intersectionTime
+                        self.timer = int(self.north_greenRatio * self.intersectionTime)
                 else:
                     if self.intersectionEntranceBlocks['south'].isGreen:
-                        self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+                        self.timer = int((1 - self.north_greenRatio) * self.intersectionTime)
                     else:
-                        self.timer = self.north_greenRatio * self.intersectionTime
+                        self.timer = int(self.north_greenRatio * self.intersectionTime)
                 self.dead_time_timer = self.DEAD_TIME
                 #self.toggle_lights() #XXXX
                 self.set_lights_deadMode()  # remember light settings and turn all the traffic lights of this intersection red
