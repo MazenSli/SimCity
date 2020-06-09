@@ -76,8 +76,8 @@ def createExampleMap(intersections, i_mat):
     for d in range(len(intersections)):
         dict_inter[intersections[d]] = intersections[d].directions
 
-    street_length_min = 19
-    street_length_max = 20
+    street_length_min = 22
+    street_length_max = 44
 
     N_columns = 5
     N_rows = 3
@@ -161,7 +161,7 @@ def generateCars(streets, N_cars=800):
 
 def setLightParams(intersections, state):
     for i in range(len(intersections)):
-        intersections[i].set_lights(state[0][i], state[1][i])
+        intersections[i].set_lights(state[0][i], state[1][i], state[2][i])
 
 
 def simulateTraffic(intersections, cars, simTime=500):

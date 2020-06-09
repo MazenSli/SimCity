@@ -80,10 +80,15 @@ def printStats(pop, gen):
     maxval = pop[0].fit
     maxvalState = pop[0].state
     mutRate = pop[0].mutRate
+    best_individual = pop[0]
+    i = 0
     for ind in pop:
+        i += 1
         avgval += ind.fit
-        if ind.fit > maxval:
+        if ind.fit > maxval:  # the elements were sorted to begin with, so this will never be the case
+            printStats('THIS PRINT WILL NEVER HAPPEN')
             maxval = ind.fit
+            best_individual = ind
             maxvalState = ind.state
             mutRate = ind.mutRate
         print(ind)
@@ -91,7 +96,9 @@ def printStats(pop, gen):
     print('Max fitness', maxval)
     print('MutRate', mutRate)
     print('Avg fitness', avgval / len(pop))
-    print('Max Value State ' + str(maxvalState[0]) + '\t' + str(maxvalState[1]) + '\t')
+    print('Max Value State ' + str(maxvalState[0]) + '\t' +
+          str(maxvalState[1]) + '\t' + str(maxvalState[2]) + '\t')
+    print('Avg idleTime:', np.mean(np.array(best_individual.idleTimes)))
     print('')
 
 
@@ -129,7 +136,7 @@ def ev3(cfg, intersections, streets):
     # print initial pop stats
     printStats(population, 0)
 
-    cars = generateCars(streets, 120)
+    cars = generateCars(streets, 100)
     # evolution main loop
     X = np.arange(0, cfg.generationCount)
     bestFit = np.arange(0, cfg.generationCount)
@@ -137,7 +144,7 @@ def ev3(cfg, intersections, streets):
     Z = np.zeros((len(Y), len(X)))
 
     for i in range(cfg.generationCount):
-        simTime = 1500
+        simTime = 2000
         TrafficLightExp.simTime = simTime
 
         for ind in population:
@@ -152,7 +159,7 @@ def ev3(cfg, intersections, streets):
 
             setLightParams(intersections, ind.state)
             simulateTraffic(intersections, cars_ind, simTime)
-#            c = 0
+
 #            for k in cars_ind:
 #                c += 1
 #                print('idleTime of car', c, ':', k.idleTime)
