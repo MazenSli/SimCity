@@ -76,8 +76,8 @@ def createExampleMap(intersections, i_mat):
     for d in range(len(intersections)):
         dict_inter[intersections[d]] = intersections[d].directions
 
-    street_length_min = 19
-    street_length_max = 20
+    street_length_min = 22
+    street_length_max = 44
 
     N_columns = 5
     N_rows = 3

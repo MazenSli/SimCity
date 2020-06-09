@@ -16,12 +16,12 @@ class Intersection:
     def __init__(self, name=None, N_connections=4, missing_dir=None):
         if name is not None:
             setattr(self, 'name', name)
-        self.time_counter = 0
+        self.DEAD_TIME = 2
+        self.dead_time_timer = 0
         self.streets = []
         self.north_greenRatio = 0.5
-        self.intersectionTime = 0  # 250
-        self.toggleShift = randrange(0,
-                                     self.intersectionTime * self.north_greenRatio + 1)
+        self.intersectionTime = 30  # 250
+        self.toggleShift = randrange(0, self.intersectionTime * self.north_greenRatio + 1)
         # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
         self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
         self.N_connections = N_connections
@@ -29,6 +29,7 @@ class Intersection:
         self.intersectionEntranceBlocks = None
         self.intersectionExitBlocks = None
         self.missing_dir = missing_dir
+        self.light_memory = None
 
         self._init_directions()
         self._init_intersectionEntranceBlocks()
@@ -71,7 +72,7 @@ class Intersection:
     # intersectionExitBlocks represent the entrance of a road and the exit of an Intersection.
     # They are normal "Block" objects
     def _init_intersectionExitBlocks(self):
-        self.intersectionExitBlocks = {  # todo: if direction exists...
+        self.intersectionExitBlocks = {
             'north': Block(blockType='roadEntrance', relatedIntersection=self),
             'east': Block(blockType='roadEntrance', relatedIntersection=self),
             'south': Block(blockType='roadEntrance', relatedIntersection=self),
@@ -147,6 +148,17 @@ class Intersection:
             self.streets.append(street)
             setattr(self, direction, street)
 
+    # saves the traffic light status then turns it into dead_mode
+    def set_lights_deadMode(self):
+        self.light_memory = {}
+        for direction, iBlock in self.intersectionEntranceBlocks.items():
+            self.light_memory[direction] = iBlock.isGreen
+            iBlock.isGreen = False
+
+    def exit_lights_deadMode(self):
+        for direction, iBlock in self.intersectionEntranceBlocks.items():
+            iBlock.isGreen = self.light_memory[direction]
+
     def toggle_lights(self):
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             iBlock.toggle_light()
@@ -159,20 +171,27 @@ class Intersection:
 
     def process_intersection(
             self):  # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
-        if self.timer < 0:  # if the timer is set to 0, the traffic light will still not switch the very next iteration
-            if 'north' in self.intersectionEntranceBlocks.keys():
-                if self.intersectionEntranceBlocks['north'].isGreen:
-                    self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+        if self.dead_time_timer == 0:
+            if self.timer == 0:
+                if 'north' in self.intersectionEntranceBlocks.keys():
+                    if self.intersectionEntranceBlocks['north'].isGreen:
+                        self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+                    else:
+                        self.timer = self.north_greenRatio * self.intersectionTime
                 else:
-                    self.timer = self.north_greenRatio * self.intersectionTime
+                    if self.intersectionEntranceBlocks['south'].isGreen:
+                        self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+                    else:
+                        self.timer = self.north_greenRatio * self.intersectionTime
+                self.dead_time_timer = self.DEAD_TIME
+                self.set_lights_deadMode()  # turn all the traffic lights of this intersections red
             else:
-                if self.intersectionEntranceBlocks['south'].isGreen:
-                    self.timer = (1 - self.north_greenRatio) * self.intersectionTime
-                else:
-                    self.timer = self.north_greenRatio * self.intersectionTime
-            self.toggle_lights()
+                self.timer -= 1
         else:
-            self.timer -= 1
+            self.dead_time_timer -= 1
+            if self.dead_time_timer == 0:
+                self.exit_lights_deadMode()  # turn the traffic light back on how it was before the deadMode
+                self.toggle_lights()
 
         for direction, iBlock in self.intersectionEntranceBlocks.items():
             if not iBlock.car:  # entrancBlock has no car
@@ -188,7 +207,7 @@ class Intersection:
             # traffic light is green and there is no care in nextBlock
             # ...now we want to turn left..
             if iBlock.car.nextTurn == 'left':
-                if direction == 'north':  # todo: before continuing we have to make sure ...[south] does exist!
+                if direction == 'north':
                     if self.missing_dir is not 'south':
                         if self.intersectionEntranceBlocks['south'].car:  # opposite side has a car
                             if self.intersectionEntranceBlocks[
