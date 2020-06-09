@@ -87,7 +87,6 @@ def printStats(pop, gen):
         i += 1
         avgval += ind.fit
         if ind.fit > maxval:  # the elements were sorted to begin with, so this will never be the case
-            printStats('THIS PRINT WILL NEVER HAPPEN')
             maxval = ind.fit
             best_individual = ind
             maxvalState = ind.state
@@ -99,8 +98,7 @@ def printStats(pop, gen):
     print('Avg fitness', avgval / len(pop))
     print('Max Value State ' + str(maxvalState[0]) + '\t' +
           str(maxvalState[1]) + '\t' + str(maxvalState[2]) + '\t')
-    if gen != 0:
-        print('Avg idleTime:', np.nanmean(np.array(best_individual.idleTimes)))
+    print('Avg idleTime:', np.nanmean(np.array(best_individual.idleTimes)))
     print('')
 
 
@@ -141,9 +139,6 @@ def ev3(cfg, intersections, streets):
 
     # create initial Population (random initialization)
     population = Population(cfg.populationSize)
-
-    # print initial pop stats
-    printStats(population, 0)
 
     cars = generateCars(streets, 100)
     # evolution main loop
@@ -189,6 +184,10 @@ def ev3(cfg, intersections, streets):
 
         # create initial offspring population by copying parent pop
         offspring = population.copy()
+
+        if i == 0:
+            # print initial pop stats
+            printStats(offspring, 0)
 
         # select mating pool
         offspring.conductTournament()
