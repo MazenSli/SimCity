@@ -20,7 +20,7 @@ class Intersection:
         self.dead_time_timer = 0
         self.streets = []
         self.north_greenRatio = 0.5
-        self.intersectionTime = 30  # 250
+        self.intersectionTime = 40  # 250
         self.toggleShift = randrange(0, self.intersectionTime * self.north_greenRatio + 1)
         # e[0, intersectionTime] - toggle shift determines how long the traffic light will wait for the first toggle
         self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
@@ -167,7 +167,17 @@ class Intersection:
         self.north_greenRatio = north_greenRatio
         self.intersectionTime = intersectionTime
         self.toggleShift = toggleShift
-        self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
+        if 'north' in self.intersectionEntranceBlocks.keys():
+            if self.intersectionEntranceBlocks['north'].isGreen:
+                self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+            else:
+                self.timer = self.north_greenRatio * self.intersectionTime
+        else:
+            if self.intersectionEntranceBlocks['south'].isGreen:
+                self.timer = (1 - self.north_greenRatio) * self.intersectionTime
+            else:
+                self.timer = self.north_greenRatio * self.intersectionTime
+        #self.timer = int(self.intersectionTime * self.north_greenRatio) - self.toggleShift
 
     def process_intersection(
             self):  # todo: difference between "==" and "is"? does it matter? I randomly make use of both here...
@@ -184,10 +194,12 @@ class Intersection:
                     else:
                         self.timer = self.north_greenRatio * self.intersectionTime
                 self.dead_time_timer = self.DEAD_TIME
-                self.set_lights_deadMode()  # turn all the traffic lights of this intersections red
+                #self.toggle_lights() #XXXX
+                self.set_lights_deadMode()  # remember light settings and turn all the traffic lights of this intersection red
             else:
                 self.timer -= 1
         else:
+            #print('never happens??')
             self.dead_time_timer -= 1
             if self.dead_time_timer == 0:
                 self.exit_lights_deadMode()  # turn the traffic light back on how it was before the deadMode
@@ -198,10 +210,12 @@ class Intersection:
                 continue
             if not iBlock.isGreen:  # traffic light is red
                 iBlock.car.increment_idleTime()
+                #print('at an intersection: traffic light is red')
                 continue
             # traffic light is green
             if iBlock.nextBlock[iBlock.car.nextTurn].car:  # nextBlock of entranceBlock is occupied
                 iBlock.car.increment_idleTime()
+                #print('at an intersection: nextBlock is occupied')
                 continue
 
             # traffic light is green and there is no care in nextBlock
@@ -213,6 +227,7 @@ class Intersection:
                             if self.intersectionEntranceBlocks[
                                 'south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
+                                #print('I want to go left but my opposite goes straight 1')
                                 continue
 
                 elif direction == 'east':
@@ -221,6 +236,7 @@ class Intersection:
                             if self.intersectionEntranceBlocks[
                                 'west'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
+                                #print('I want to go left but my opposite goes straight 1')
                                 continue
 
                 elif direction == 'south':
@@ -229,6 +245,7 @@ class Intersection:
                             if self.intersectionEntranceBlocks[
                                 'north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
+                                #print('I want to go left but my opposite goes straight 1')
                                 continue
 
                 elif direction == 'west':
@@ -237,6 +254,7 @@ class Intersection:
                             if self.intersectionEntranceBlocks[
                                 'east'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
+                                #print('I want to go left but my opposite goes straight 1')
                                 continue
 
             # either we didn't intend to turn left or the opposite side doesn't exist or didn't have a car or opposite car also turns left -> we can go

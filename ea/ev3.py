@@ -148,7 +148,7 @@ def ev3(cfg, intersections, streets):
     Z = np.zeros((len(Y), len(X)))
 
     for i in range(cfg.generationCount):
-        simTime = 500
+        simTime = 1500
         TrafficLightExp.simTime = simTime
         TrafficLightLin.simTime = simTime
 
@@ -165,9 +165,12 @@ def ev3(cfg, intersections, streets):
             setLightParams(intersections, ind.state)
             simulateTraffic(intersections, cars_ind, simTime)
 
-#            for k in cars_ind:
-#                c += 1
-#                print('idleTime of car', c, ':', k.idleTime)
+            #c = 0
+            #for k in cars_ind:
+            #    c += 1
+            #    print('idleTime of car', c, ':', k.idleTime)
+            #    print('moveTime of car', c, ':', k.moveTimes)
+            #print()
 
             ind.setIdleTimes(cars_ind)
 
