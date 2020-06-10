@@ -142,7 +142,7 @@ def ev3(cfg, intersections, streets):
     # create initial Population (random initialization)
     population = Population(cfg.populationSize)
 
-    cars = generateCars(streets, 200)
+    cars = generateCars(streets, 400)
     # evolution main loop
     X = np.arange(0, cfg.generationCount)
     bestFit = np.arange(0, cfg.generationCount)
@@ -150,7 +150,7 @@ def ev3(cfg, intersections, streets):
     Z = np.zeros((len(Y), len(X)))
 
     for i in range(cfg.generationCount):
-        simTime = 1000
+        simTime = 1500
         TrafficLightExp.simTime = simTime
         TrafficLightLin.simTime = simTime
 
@@ -222,3 +222,4 @@ def ev3(cfg, intersections, streets):
     plt.ylabel('Best Fitness')
     plt.show()
 
+    return [population[0].state[0], population[0].state[1], population[0].state[2]]

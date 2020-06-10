@@ -198,7 +198,6 @@ class Intersection:
             else:
                 self.timer -= 1
         else:
-            #print('never happens??')
             self.dead_time_timer -= 1
             if self.dead_time_timer == 0:
                 self.exit_lights_deadMode()  # turn the traffic light back on how it was before the deadMode

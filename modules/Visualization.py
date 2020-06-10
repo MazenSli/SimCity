@@ -10,7 +10,7 @@ import random
 import copy
 
 from modules.Intersection import Intersection
-from modules.MapFunctions import createMap, createExampleMap, generateCars
+from modules.MapFunctions import createMap, createExampleMap, generateCars, setLightParams
 
 # 1920x1080
 time_per_frame = 0.016667  # seconds
@@ -251,7 +251,7 @@ def visualize_example():
 
     intersections = [I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11]
     streets = createExampleMap(intersections, intersection_matrix)
-    cars = generateCars(streets, 100)
+    cars = generateCars(streets, 400)
 
     screen_width = 1920
     screen_height = 1080
@@ -281,6 +281,42 @@ def visualize_example():
         a.append(car.idleTime)
     print(np.mean(a))
 
+
+def visualize_diamond(intersections, streets, states=None):
+
+    cars = generateCars(streets, 400)
+
+    screen_width = 1920
+    screen_height = 1080
+
+    setLightParams(intersections, states)
+
+    window = WindowWrapper()
+    simIntersections = [SimIntersection(int(2 * screen_width / 6), 1 * screen_height / 4, intersections[0]),
+                        SimIntersection(int(3 * screen_width / 6), 1 * screen_height / 4, intersections[1]),
+                        SimIntersection(int(4 * screen_width / 6), 1 * screen_height / 4, intersections[2]),
+                        SimIntersection(int(1 * screen_width / 6), 2 * screen_height / 4, intersections[3]),
+                        SimIntersection(int(2 * screen_width / 6), 2 * screen_height / 4, intersections[4]),
+                        SimIntersection(int(3 * screen_width / 6), 2 * screen_height / 4, intersections[5]),
+                        SimIntersection(int(4 * screen_width / 6), 2 * screen_height / 4, intersections[6]),
+                        SimIntersection(int(5 * screen_width / 6), 2 * screen_height / 4, intersections[7]),
+                        SimIntersection(int(2 * screen_width / 6), 3 * screen_height / 4, intersections[8]),
+                        SimIntersection(int(3 * screen_width / 6), 3 * screen_height / 4, intersections[9]),
+                        SimIntersection(int(4 * screen_width / 6), 3 * screen_height / 4, intersections[10])]
+
+    init_setup_blockPositions(streets)
+
+    run(simIntersections, streets, cars, window)
+
+    a = []
+    i = 0
+    for car in cars:
+        i += 1
+        print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
+        a.append(car.idleTime)
+    print(np.mean(a))
+
+
 #visualize_example()
 
 '''I1 = Intersection()
@@ -298,7 +334,7 @@ cars = generateCars(streets)
 
 visualize(intersections, streets, cars)
 '''
-I1 = Intersection(name='1', N_connections=3)
+'''I1 = Intersection(name='1', N_connections=3)
 I2 = Intersection(name='2', N_connections=3)
 I3 = Intersection(name='3', N_connections=3)
 I4 = Intersection(name='4', N_connections=3)
@@ -328,4 +364,4 @@ for car in cars:
     i += 1
     print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
     a.append(car.idleTime)
-print(np.mean(np.array(a)))
+print(np.mean(np.array(a)))'''
