@@ -2,8 +2,8 @@
 # Car.py
 #
 #
+
 import random
-from modules.IntersectionBlock import IntersectionBlock
 
 from modules.IntersectionBlock import IntersectionBlock
 

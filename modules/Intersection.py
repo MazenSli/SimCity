@@ -2,9 +2,11 @@
 # Intersection.py
 #
 #
+
+from random import randrange
+
 from modules.Block import Block
 from modules.IntersectionBlock import IntersectionBlock
-from random import randrange, uniform
 
 
 class Intersection:
