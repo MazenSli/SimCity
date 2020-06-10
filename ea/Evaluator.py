@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class TrafficLightExp:
     A = None
     simTime = None
@@ -38,4 +39,5 @@ class TrafficLightSimple:
         fitness = 1/np.mean(np.array(idleTimes))
 
         return fitness * cls.A
+
 

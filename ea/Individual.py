@@ -4,6 +4,7 @@
 #
 
 import math
+import numpy as np
 
 # Base class for all individual types
 #
@@ -21,13 +22,14 @@ class Individual:
     def __init__(self):
         self.idleTimes = []
         self.fit = self.__class__.fitFunc(self.idleTimes)
-        self.mutRate = [self.uniprng.uniform(0.9, 0.1) for k in range(3)]  # use "normalized" sigma
+        self.mutRate = [[self.uniprng.uniform(0.9, 0.1) for k in range(self.nLength)] for j in range(3)]
 
     def mutateMutRate(self):
         for k in range(3):
-            self.mutRate[k] = self.mutRate[k] * math.exp(self.learningRate * self.normprng.normalvariate(0, 1))
-            if self.mutRate[k] < self.minMutRate: self.mutRate[k] = self.minMutRate
-            if self.mutRate[k] > self.maxMutRate: self.mutRate[k] = self.maxMutRate
+            for i in range(self.nLength):
+                self.mutRate[k][i] = self.mutRate[k][i] * math.exp(self.learningRate * self.normprng.normalvariate(0, 1))
+                if self.mutRate[k][i] < self.minMutRate: self.mutRate[k][i] = self.minMutRate
+                if self.mutRate[k][i] > self.maxMutRate: self.mutRate[k][i] = self.maxMutRate
 
     def evaluateFitness(self):
         if self.fit is None:
@@ -99,11 +101,11 @@ class MultivariateIndividual(Individual):
 
         for i in range(self.nLength):
             self.state[0][i] = self.state[0][i] + ((1-self.minNorthGreenRatio) - self.minNorthGreenRatio) *\
-                               self.mutRate[0] * self.normprng.normalvariate(0, 1)
+                               self.mutRate[0][i] * self.normprng.normalvariate(0, 1)
             if self.state[0][i] > 1-self.minNorthGreenRatio: self.state[0][i] = 1-self.minNorthGreenRatio
             if self.state[0][i] < self.minNorthGreenRatio: self.state[0][i] = self.minNorthGreenRatio
 
-            self.state[1][i] = self.state[1][i] + (self.maxIntersectionTime - self.minIntersectionTime) * self.mutRate[1] \
+            self.state[1][i] = self.state[1][i] + (self.maxIntersectionTime - self.minIntersectionTime) * self.mutRate[1][i] \
                                * self.normprng.normalvariate(0, 1)
             if self.state[1][i] > self.maxIntersectionTime:
                 self.state[1][i] = self.maxIntersectionTime
@@ -111,7 +113,7 @@ class MultivariateIndividual(Individual):
                 self.state[1][i] = self.minIntersectionTime
 
             self.state[2][i] = self.state[2][i] + \
-                               (self.state[0][i] * self.state[1][i] - 0) * self.mutRate[2] \
+                               (self.state[0][i] * self.state[1][i] - 0) * self.mutRate[2][i] \
                                * self.normprng.normalvariate(0, 1)
             if self.state[2][i] > self.state[0][i] * self.state[1][i]:
                 self.state[2][i] = self.state[0][i] * self.state[1][i]
@@ -136,5 +138,5 @@ class MultivariateIndividual(Individual):
         params = ['NorthGreenRatio', 'IntersectionTime', 'ToggleTime']
         for k in range(len(params)):
             str_ind += '\t' + params[k] + ': ' + str(self.state[k]) + '\t' + \
-                      '%0.8e' % self.fit + '\t' + '%0.8e' % self.mutRate[k]
+                      '%0.8e' % self.fit + '\t' + '%0.8e' % (np.mean(self.mutRate[k]))
         return str_ind
