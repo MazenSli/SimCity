@@ -9,7 +9,8 @@ from modules.MapFunctions import createMap, createExampleMap
 from modules.Intersection import Intersection
 from ea.ev3 import EV3_Config, ev3
 from modules.Visualization import visualize_diamond
-from copy import deepcopy
+from random import uniform
+
 
 #
 # Main entry point
@@ -18,7 +19,7 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
 
-        sys.setrecursionlimit(10000)
+        sys.setrecursionlimit(1000000)
         
 #        I1 = Intersection(name='Shilin')
 #        I2 = Intersection(name='Zhongshan')
@@ -30,7 +31,7 @@ def main(argv=None):
 #        I3 = Intersection(name='3', N_connections=3)
 #        I4 = Intersection(name='4', N_connections=3)
 #        I5 = Intersection(name='5')
-
+        
         I1 = Intersection(name='10', N_connections=3, missing_dir='north')
         I2 = Intersection(name='20', N_connections=3, missing_dir='north')
         I3 = Intersection(name='30', N_connections=3, missing_dir='north')
@@ -85,7 +86,13 @@ def main(argv=None):
 
         visualize_diamond(intersections, streets, states)
 
+        state_default = [[] for j in range(3)]
+        for i in range(nLength):
+            state_default[0].append(0.5)
+            state_default[1].append(60)
+            state_default[2].append(uniform(0, 30))
 
+        visualize_diamond(intersections, streets, state_default)
 
 
 if __name__ == '__main__':
