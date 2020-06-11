@@ -1,24 +1,22 @@
 #
-# ev3a.py: An elitist (mu+mu) generational-with-overlap EA
+# ev3.py: An elitist (mu+mu) generational-with-overlap EA
 #
-#
-# To run: python ev3a.py --input my_params.cfg
 #
 # Basic features of ev3a:
 #   - Supports self-adaptive mutation
 #   - Uses binary tournament selection for mating pool
 #   - Uses elitist truncation selection for survivors
-#   - Supports IntegerVector and Multivariate Individual types
+#   - Multivariate Individual types
 #
 
-import yaml
-import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
 from random import Random
+
 import matplotlib.pyplot as plt
+import yaml
 
 from ea.Population import *
 from ea.Evaluator import *
+
 from modules.MapFunctions import generateCars, simulateTraffic, setLightParams
 
 
@@ -27,13 +25,13 @@ class EV3_Config:
     """
     EV3 configuration class
     """
+
     # class variables
     sectionName = 'EV3'
     options = {'populationSize': (int, True),
                'generationCount': (int, True),
                'randomSeed': (int, True),
                'crossoverFraction': (float, True),
-               'trafficLightA': (float, False),
                'evaluator': (str, False),
                'minIntersectionTime': (float, False),
                'maxIntersectionTime': (float, False),
@@ -49,7 +47,7 @@ class EV3_Config:
         if eccfg is None:
             raise Exception('Missing {} section in cfg file'.format(self.sectionName))
 
-        # number of traffic light parameters
+        # number of intersections
         self.nLength = nLength
         self.N_cars = N_cars
 
@@ -57,11 +55,9 @@ class EV3_Config:
         for opt in self.options:
             if opt in eccfg:
                 optval = eccfg[opt]
-
                 # verify parameter type
                 if type(optval) != self.options[opt][0]:
                     raise Exception('Parameter "{}" has wrong type'.format(opt))
-
                 # create attributes on the fly
                 setattr(self, opt, optval)
             else:
@@ -83,15 +79,9 @@ def printStats(pop, gen):
     maxvalState = pop[0].state
     mutRate = pop[0].mutRate
     best_individual = pop[0]
-    i = 0
+
     for ind in pop:
-        i += 1
         avgval += ind.fit
-        if ind.fit > maxval:  # the elements were sorted to begin with, so this will never be the case
-            maxval = ind.fit
-            best_individual = ind
-            maxvalState = ind.state
-            mutRate = ind.mutRate
         print(ind)
 
     print('Max fitness', maxval)
@@ -103,9 +93,46 @@ def printStats(pop, gen):
     print('')
 
 
-# EV3:
-#            
+# Plot EV results
+def plotEv(X, Y, Z, bestFit):
+    # 3D plot
+    # X: Generation count
+    # Y: Population
+    # Z: Fitness value
+    f = plt.figure(0)
+    ax = f.add_subplot(111, projection='3d')
+    Xp, Yp = np.meshgrid(X, Y)
+    ax.plot_surface(Xp, Yp, Z)
+    ax.set_title('EA Traffic simulation')
+    ax.set_xlabel('Generation count')
+    ax.set_ylabel('Population')
+    ax.set_zlabel('Fitness')
+
+    # 2D plot
+    # X: Generation count
+    # Z: Best fitness value
+    plt.figure(1)
+    plt.plot(X, bestFit)
+    plt.title('EA Traffic simulation')
+    plt.xlabel('Generation count')
+    plt.ylabel('Best Fitness')
+    plt.show()
+
+
 def ev3(cfg, intersections, streets):
+    """
+    EV3
+
+    Args:
+        cfg: configuration parameters
+        intersections: list of intersection objects
+        streets: list of street objects
+
+    Returns:
+        state: state of individual with best fitness value after the last generation
+        (north green ratios,  intersection times and toggle times for all intersections)
+    """
+
     # start random number generators
     uniprng = Random()
     uniprng.seed(cfg.randomSeed)
@@ -113,7 +140,6 @@ def ev3(cfg, intersections, streets):
     normprng.seed(cfg.randomSeed + 101)
 
     # set static params on classes
-    # (probably not the most elegant approach, but let's keep things simple...)
     Individual.uniprng = uniprng
     Individual.normprng = normprng
     Population.uniprng = uniprng
@@ -144,11 +170,13 @@ def ev3(cfg, intersections, streets):
 
     cars = generateCars(streets, cfg.N_cars)
     # evolution main loop
+
     X = np.arange(0, cfg.generationCount)
-    bestFit = np.arange(0, cfg.generationCount)
     Y = np.arange(0, cfg.populationSize)
     Z = np.zeros((len(Y), len(X)))
+    bestFit = np.arange(0, cfg.generationCount)
 
+    # evolution main loop
     for i in range(cfg.generationCount):
         simTime = 2000  # simTime determines how many time steps the simulation runs, this value should be
                         # adjusted whenever the length of the streets is changed
@@ -172,19 +200,16 @@ def ev3(cfg, intersections, streets):
             for car in cars_ind:
                 car.position.remove_car()
 
-        maxval = population[0].fit
+        # store best fitness elements for plot
         for p in range(len(population)):
             Z[p][i] = population[p].fit
-            if population[p].fit > maxval:
-                maxval = population[p].fit
-
-        bestFit[i] = maxval
+        bestFit[i] = population[0].fit
 
         # create initial offspring population by copying parent pop
         offspring = population.copy()
 
+        # print initial population stats
         if i == 0:
-            # print initial pop stats
             printStats(offspring, 0)
 
         # select mating pool
@@ -206,20 +231,6 @@ def ev3(cfg, intersections, streets):
         # print population stats
         printStats(population, i + 1)
 
-    f = plt.figure(0)
-    ax = f.add_subplot(111, projection='3d')
-    Xp, Yp = np.meshgrid(X, Y)
-    ax.plot_surface(Xp, Yp, Z)
-    ax.set_title('EA Traffic simulation')
-    ax.set_xlabel('Generation count')
-    ax.set_ylabel('Population')
-    ax.set_zlabel('Fitness')
-
-    plt.figure(1)
-    plt.plot(X, bestFit)
-    plt.title('EA Traffic simulation')
-    plt.xlabel('Generation count')
-    plt.ylabel('Best Fitness')
-    plt.show()
+    plotEv(X, Y, Z, bestFit)
 
     return [population[0].state[0], population[0].state[1], population[0].state[2]]

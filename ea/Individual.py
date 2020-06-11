@@ -1,10 +1,11 @@
 #
 # Individual.py
 #
-#
 
 import math
 
+
+#
 # Base class for all individual types
 #
 class Individual:
@@ -21,7 +22,7 @@ class Individual:
     def __init__(self):
         self.idleTimes = []
         self.fit = self.__class__.fitFunc(self.idleTimes)
-        self.mutRate = [self.uniprng.uniform(0.9, 0.1) for k in range(3)]  # use "normalized" sigma
+        self.mutRate = [self.uniprng.uniform(0.9, 0.1) for j in range(3)]
 
     def mutateMutRate(self):
         for k in range(3):

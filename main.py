@@ -1,16 +1,18 @@
 #
 # main.py
 #
+# To run: python main.py
 #
 
 import sys
 
-from modules.MapFunctions import createMap, createExampleMap
+from modules.MapFunctions import createExampleMap
 from modules.Intersection import Intersection
-from ea.ev3 import EV3_Config, ev3
 from modules.Visualization import visualize_diamond
-from random import uniform
 
+from ea.ev3 import EV3_Config, ev3
+
+from random import uniform
 
 #
 # Main entry point
@@ -19,19 +21,15 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
 
+        # for copy function
         sys.setrecursionlimit(1000000)
-        
-#        I1 = Intersection(name='Shilin')
-#        I2 = Intersection(name='Zhongshan')
-#        I3 = Intersection(name='Beimen')
-#        I4 = Intersection(name='Longshan')
 
 #        I1 = Intersection(name='1', N_connections=3)
 #        I2 = Intersection(name='2', N_connections=3)
 #        I3 = Intersection(name='3', N_connections=3)
 #        I4 = Intersection(name='4', N_connections=3)
 #        I5 = Intersection(name='5')
-        
+
         I1 = Intersection(name='10', N_connections=3, missing_dir='north')
         I2 = Intersection(name='20', N_connections=3, missing_dir='north')
         I3 = Intersection(name='30', N_connections=3, missing_dir='north')
@@ -58,9 +56,10 @@ def main(argv=None):
         intersection_matrix.append(col5)
 
         intersections = [I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11]
-        streets = createExampleMap(intersections, intersection_matrix)
-
         nLength = len(intersections)
+
+        # create streets
+        streets = createExampleMap(intersections, intersection_matrix)
 
         N_cars = 600
 
@@ -69,6 +68,7 @@ def main(argv=None):
 
 #        streets = createExampleMap([I1, I2, I3, I4, I5])
 
+        # print generated intersections, street and lanes
         for i in intersections:
             print(i)
             for street in i.streets:
@@ -85,6 +85,7 @@ def main(argv=None):
         # run EV3
         states = ev3(cfg, intersections, streets)
 
+        # visualize map
         visualize_diamond(intersections, streets, N_cars, states)
 
         state_default = [[] for j in range(3)]
@@ -94,7 +95,6 @@ def main(argv=None):
             state_default[2].append(uniform(0, 30))
 
         visualize_diamond(intersections, streets, N_cars, state_default)
-
 
 if __name__ == '__main__':
     main()

@@ -1,18 +1,27 @@
 #
 # MapFunctions.py
 #
+# Functions for creating map elements and simulating traffic
 #
 
+import copy
+
 from random import randrange, shuffle
+
 from modules.Street import Street
 from modules.Car import Car
-import copy
-from modules.Lane import Lane
-from modules.IntersectionBlock import IntersectionBlock
-from modules.Block import Block
 
 
 def createMap(intersections):
+    """
+    Given intersections, it creates streets that connects all intersections
+
+    Args:
+        intersections: list of intersection objects
+
+    Returns:
+        streets: list of street objects
+    """
     streets = []
     dict_inter = {}
 
@@ -20,12 +29,6 @@ def createMap(intersections):
         dict_inter[intersections[d]] = intersections[d].directions
 
     print(dict_inter)
-
-    #    names = ['Dunhua Rd.', 'Fuxing Rd.', 'Guangfu Rd.', 'Heping Rd.',
-    #             'Keelung Rd.', 'Roosevelt Rd.', 'Xinsheng Rd.', 'Xinyi Rd.',
-    #             'Zhongshan Rd', 'Zhongxiao Rd.', 'Anping Old St.',
-    #             'Ciaonan St.', 'Xinhua Old St.', 'Fukang St.', 'Hou St.',
-    #             'Huagang Rd.', 'Jingfeng St.']
 
     names = ['A', 'B', 'C', 'D',
              'E', 'F', 'G', 'H',
@@ -140,8 +143,17 @@ def createExampleMap(intersections, i_mat):
 
 
 def generateCars(streets, N_cars=5):
-    cars = []
+    """
+    Place a certain number of cars randomly in given streets
 
+    Args:
+        streets: list of street objects
+        N_cars: number of cars to be generated
+
+    Returns:
+        cars: list of car objects
+    """
+    cars = []
     leftCars = N_cars
     while leftCars >= 0:
         street = streets[randrange(0, len(streets))]
@@ -158,14 +170,28 @@ def generateCars(streets, N_cars=5):
     return cars
 
 
-def setLightParams(intersections, state):
+def setLightParams(intersections, lightParams):
+    """
+    Set north green time ratios, intersection times and toggle times of intersections
+
+    Args:
+        intersections: list of intersection objects
+        lightParams: List of north green time ratios, intersection times and toggle times
+    """
     for i in range(len(intersections)):
-        intersections[i].set_lights(state[0][i], state[1][i], state[2][i])
+        intersections[i].set_lights(lightParams[0][i], lightParams[1][i], lightParams[2][i])
 
 
 def simulateTraffic(intersections, cars, simTime=500):
-    timeCounter = 0
+    """
+    Simulate traffic
 
+    Args:
+        intersections: list of intersection objects
+        cars: list of car objects
+        simTime: simulation time
+    """
+    timeCounter = 0
     while timeCounter < simTime:
         for simInter in intersections:
             simInter.process_intersection()

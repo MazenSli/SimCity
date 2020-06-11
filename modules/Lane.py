@@ -2,8 +2,8 @@
 # Lane.py
 #
 #
+
 from modules.Block import Block
-from modules.IntersectionBlock import IntersectionBlock
 
 
 class Lane:
