@@ -85,7 +85,7 @@ def main(argv=None):
         # run EV3
         states = ev3(cfg, intersections, streets)
 
-        visualize_diamond(intersections, streets, states)
+        visualize_diamond(intersections, streets, N_cars, states)
 
         state_default = [[] for j in range(3)]
         for i in range(nLength):
@@ -93,7 +93,7 @@ def main(argv=None):
             state_default[1].append(60)
             state_default[2].append(uniform(0, 30))
 
-        visualize_diamond(intersections, streets, state_default)
+        visualize_diamond(intersections, streets, N_cars, state_default)
 
 
 if __name__ == '__main__':
