@@ -195,8 +195,7 @@ class Intersection:
                     else:
                         self.timer = round(self.north_greenRatio * self.intersectionTime)
                 self.dead_time_timer = self.DEAD_TIME
-                #self.toggle_lights() #XXXX
-                self.set_lights_deadMode()  # remember light settings and turn all the traffic lights of this intersection red
+                self.set_lights_deadMode()  # remembers light settings and turn all the traffic lights of this intersection red
             else:
                 self.timer -= 1
         else:
@@ -210,12 +209,10 @@ class Intersection:
                 continue
             if not iBlock.isGreen:  # traffic light is red
                 iBlock.car.increment_idleTime()
-                #print('at an intersection: traffic light is red')
                 continue
             # traffic light is green
             if iBlock.nextBlock[iBlock.car.nextTurn].car:  # nextBlock of entranceBlock is occupied
                 iBlock.car.increment_idleTime()
-                #print('at an intersection: nextBlock is occupied')
                 continue
 
             # traffic light is green and there is no care in nextBlock
@@ -226,12 +223,10 @@ class Intersection:
                         if self.intersectionEntranceBlocks['south'].car:  # opposite side has a car
                             if not ((self.intersectionEntranceBlocks['south'].car.nextTurn is 'left') or (self.intersectionEntranceBlocks['south'].nextBlock[self.intersectionEntranceBlocks['south'].car.nextTurn].car is not None)):  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
-                                #print('I want to go left but my opposite goes straight 1')
                                 continue
 
                             if self.intersectionEntranceBlocks['south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
-                                #print('I want to go left but my opposite goes straight 1')
                                 continue
 
                 elif direction == 'east':
@@ -239,7 +234,6 @@ class Intersection:
                         if self.intersectionEntranceBlocks['west'].car:  # opposite side has a car
                             if not ((self.intersectionEntranceBlocks['west'].car.nextTurn is 'left') or (self.intersectionEntranceBlocks['west'].nextBlock[self.intersectionEntranceBlocks['west'].car.nextTurn].car is not None)):  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
-                                #print('I want to go left but my opposite goes straight 1')
                                 continue
 
                 elif direction == 'south':
@@ -247,7 +241,6 @@ class Intersection:
                         if self.intersectionEntranceBlocks['north'].car:  # opposite side has a car
                             if not ((self.intersectionEntranceBlocks['north'].car.nextTurn is 'left') or (self.intersectionEntranceBlocks['north'].nextBlock[self.intersectionEntranceBlocks['north'].car.nextTurn].car is not None)):  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
-                                #print('I want to go left but my opposite goes straight 1')
                                 continue
 
                 elif direction == 'west':
@@ -255,10 +248,11 @@ class Intersection:
                         if self.intersectionEntranceBlocks['east'].car:  # opposite side has a car
                             if not ((self.intersectionEntranceBlocks['east'].car.nextTurn is 'left') or (self.intersectionEntranceBlocks['east'].nextBlock[self.intersectionEntranceBlocks['east'].car.nextTurn].car is not None)):  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
-                                #print('I want to go left but my opposite goes straight 1')
                                 continue
 
-            # either we didn't intend to turn left or the opposite side doesn't exist or didn't have a car or opposite car also turns left -> we can go
+            # either we didn't intend to turn left or the opposite side doesn't exist or didn't have a car
+            # or opposite car also turns left
+            # -> we can go
             iBlock.car.moveToNextBlock()
 
     def checkDirection(self, direction):

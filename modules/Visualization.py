@@ -279,4 +279,4 @@ def visualize_diamond(intersections, streets, N_cars, states=None):
         i += 1
         print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
         a.append(car.idleTime)
-    print(np.mean(a))
+    print('average: ', np.mean(a))
