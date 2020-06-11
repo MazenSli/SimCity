@@ -39,14 +39,14 @@ class Point:
 
 
 class SimIntersection:
-    def __init__(self, x_loc, y_loc, intersection, color_r=100, color_g=100, color_b=255):
+    def __init__(self, x_loc, y_loc, intersection, color_r=150, color_g=150, color_b=150):
         self.location = np.array((x_loc, y_loc))
         self.color = game.Color(color_r, color_g, color_b)
         self.intersection = intersection
         self.width = 60
         self.height = 60
-        self.enterExit_width = 7
-        self.enterExit_height = 7
+        self.enterExit_width = 10
+        self.enterExit_height = 10
         self.rect = game.Rect(x_loc - self.width / 2, y_loc - self.height / 2, self.width, self.height)
         self.CONST = 6
         self.entrancePoints = {
@@ -71,13 +71,13 @@ class SimIntersection:
         light_pos = copy.deepcopy(self.entrancePoints)
         for direction, point in light_pos.items():
             if direction == 'north':
-                light_pos[direction] = point.add_vector(Point(-12, -5))
+                light_pos[direction] = point.add_vector(Point(-15, -9))
             if direction == 'east':
-                light_pos[direction] = point.add_vector(Point(5, -12))
+                light_pos[direction] = point.add_vector(Point(7, -15))
             if direction == 'south':
-                light_pos[direction] = point.add_vector(Point(12, 5))
+                light_pos[direction] = point.add_vector(Point(14, 7))
             if direction == 'west':
-                light_pos[direction] = point.add_vector(Point(-5, 12))
+                light_pos[direction] = point.add_vector(Point(-9, 13))
 
         for dir, entrance in self.intersection.intersectionEntranceBlocks.items():
             if entrance.isGreen:
@@ -86,14 +86,14 @@ class SimIntersection:
                 red_green = game.Color(200, 0, 0)
             game.draw.rect(window.screen, red_green, game.Rect(light_pos[dir].x_loc - self.enterExit_width / 2,
                                                                light_pos[dir].y_loc - self.enterExit_height / 2,
-                                                               self.enterExit_width, self.enterExit_height))
+                                                               self.enterExit_width * 1.2, self.enterExit_height * 1.2))
         for dir, entrance in self.intersection.intersectionEntranceBlocks.items():
-            game.draw.rect(window.screen, game.Color(60, 60, 60),
+            game.draw.rect(window.screen, game.Color(0, 0, 0),
                            game.Rect(entrance.visualizationPoint.x_loc - self.enterExit_width / 2,
                                      entrance.visualizationPoint.y_loc - self.enterExit_height / 2,
                                      self.enterExit_width, self.enterExit_height))
         for dir, iExit in self.exitPoints.items():
-            game.draw.rect(window.screen, game.Color(60, 60, 60),
+            game.draw.rect(window.screen, game.Color(0, 0, 0),
                            game.Rect(iExit.x_loc - self.enterExit_width / 2, iExit.y_loc - self.enterExit_height / 2,
                                      self.enterExit_width, self.enterExit_height))
 
@@ -129,24 +129,27 @@ def init_setup_blockPositions(streets):
 
 
 def draw_streets(streets, window):
-    block_color = game.Color(255, 255, 255)
+    block_color = game.Color(120, 140, 210)
     block_radius = 3
     car_color = game.Color(255, 165, 0)
     car_radius = 6
 
     for street in streets:
         for lane in street.lanes:
-            game.draw.line(window.screen, game.Color(80, 80, 170),
+            game.draw.line(window.screen, game.Color(120, 140, 210),
                            (lane.blocks[0].visualizationPoint.x_loc, lane.blocks[0].visualizationPoint.y_loc), (
                            lane.blocks[lane.length - 1].visualizationPoint.x_loc,
                            lane.blocks[lane.length - 1].visualizationPoint.y_loc), 2)
+            for block in lane.blocks:
+                if not block.car:
+                    game.draw.circle(window.screen, block_color,
+                                     (int(block.visualizationPoint.x_loc), int(block.visualizationPoint.y_loc)),
+                                     block_radius)
             for block in lane.blocks:
                 if block.car:
                     game.draw.circle(window.screen, car_color,
                                      (int(block.visualizationPoint.x_loc), int(block.visualizationPoint.y_loc)),
                                      car_radius)
-                else:
-                    game.draw.circle(window.screen, block_color, (int(block.visualizationPoint.x_loc), int(block.visualizationPoint.y_loc)), block_radius)
 
     # todo: something like this would be cool for performance while visualizing but not priority.
     '''def init_screen(window, intersections, streets): 
@@ -171,17 +174,14 @@ def run(simIntersections, streets, cars, window):
             # update
             time_counter += 1
             time_past = (time.perf_counter() - t0)
-            # update_physics(time_past)
             t0 = time.perf_counter()
-            if time_counter >= 3:
+            if time_counter >= 2:   # this factor regulates the "speed" of the visualization
                 # slower event...
                 a += 1
                 print(a)
-                if a >= 1500:
+                if a >= 2000:
                     window.running = False
-                #for car in cars:
-                #    print('car position:', car.position, '   position of care hasCar? - ', car.position.car)
-                render(window, simIntersections, streets)  # this function is a hardcore bottleneck
+                render(window, simIntersections, streets)
                 for simInter in simIntersections:
                     simInter.intersection.process_intersection()
                 for car in cars:
@@ -205,9 +205,19 @@ def render(window, intersections, streets):
     game.display.flip()
 
 
-def visualize(intersections, streets, cars):
+# this visualization only works for traffic networks with exactly five intersections
+def visualize(intersections, streets, N_cars, states=None):
+    for street in streets:
+        for lane in street.lanes:
+            for block in lane.blocks:
+                block.remove_car()
+
+    cars = generateCars(streets, N_cars)
+
     screen_width = 1920
     screen_height = 1080
+
+    setLightParams(intersections, states)
 
     window = WindowWrapper()
 
@@ -222,69 +232,24 @@ def visualize(intersections, streets, cars):
 
     run(simIntersections, streets, cars, window)
 
-
-def visualize_example():
-    I1 = Intersection(name='10', N_connections=3, missing_dir='north')
-    I2 = Intersection(name='20', N_connections=3, missing_dir='north')
-    I3 = Intersection(name='30', N_connections=3, missing_dir='north')
-    I4 = Intersection(name='01', N_connections=3, missing_dir='west')
-    I5 = Intersection(name='11', N_connections=4)
-    I6 = Intersection(name='21', N_connections=4)
-    I7 = Intersection(name='31', N_connections=4)
-    I8 = Intersection(name='41', N_connections=3, missing_dir='east')
-    I9 = Intersection(name='12', N_connections=3, missing_dir='south')
-    I10 = Intersection(name='22', N_connections=3, missing_dir='south')
-    I11 = Intersection(name='32', N_connections=3, missing_dir='south')
-
-    intersection_matrix = []
-    col1 = [None, I4, None]
-    col2 = [I1, I5, I9]
-    col3 = [I2, I6, I10]
-    col4 = [I3, I7, I11]
-    col5 = [None, I8, None]
-
-    intersection_matrix.append(col1)
-    intersection_matrix.append(col2)
-    intersection_matrix.append(col3)
-    intersection_matrix.append(col4)
-    intersection_matrix.append(col5)
-
-    intersections = [I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11]
-    streets = createExampleMap(intersections, intersection_matrix)
-    cars = generateCars(streets, 400)
-
-    screen_width = 1920
-    screen_height = 1080
-
-    window = WindowWrapper()
-    simIntersections = [SimIntersection(int(2 * screen_width / 6), 1 * screen_height / 4, intersections[0]),
-                        SimIntersection(int(3 * screen_width / 6), 1 * screen_height / 4, intersections[1]),
-                        SimIntersection(int(4 * screen_width / 6), 1 * screen_height / 4, intersections[2]),
-                        SimIntersection(int(1 * screen_width / 6), 2 * screen_height / 4, intersections[3]),
-                        SimIntersection(int(2 * screen_width / 6), 2 * screen_height / 4, intersections[4]),
-                        SimIntersection(int(3 * screen_width / 6), 2 * screen_height / 4, intersections[5]),
-                        SimIntersection(int(4 * screen_width / 6), 2 * screen_height / 4, intersections[6]),
-                        SimIntersection(int(5 * screen_width / 6), 2 * screen_height / 4, intersections[7]),
-                        SimIntersection(int(2 * screen_width / 6), 3 * screen_height / 4, intersections[8]),
-                        SimIntersection(int(3 * screen_width / 6), 3 * screen_height / 4, intersections[9]),
-                        SimIntersection(int(4 * screen_width / 6), 3 * screen_height / 4, intersections[10])]
-
-    init_setup_blockPositions(streets)
-
-    run(simIntersections, streets, cars, window)
-
     a = []
     i = 0
     for car in cars:
         i += 1
         print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
         a.append(car.idleTime)
-    print(np.mean(a))
+    print('average: ', np.mean(a))
 
 
-def visualize_diamond(intersections, streets, states=None):
+# this visualization works only for the "diamond shaped" example map
+def visualize_diamond(intersections, streets, N_cars, states=None):
 
-    cars = generateCars(streets, 400)
+    for street in streets:
+        for lane in street.lanes:
+            for block in lane.blocks:
+                block.remove_car()
+
+    cars = generateCars(streets, N_cars)
 
     screen_width = 1920
     screen_height = 1080
@@ -292,17 +257,17 @@ def visualize_diamond(intersections, streets, states=None):
     setLightParams(intersections, states)
 
     window = WindowWrapper()
-    simIntersections = [SimIntersection(int(2 * screen_width / 6), 1 * screen_height / 4, intersections[0]),
-                        SimIntersection(int(3 * screen_width / 6), 1 * screen_height / 4, intersections[1]),
-                        SimIntersection(int(4 * screen_width / 6), 1 * screen_height / 4, intersections[2]),
-                        SimIntersection(int(1 * screen_width / 6), 2 * screen_height / 4, intersections[3]),
-                        SimIntersection(int(2 * screen_width / 6), 2 * screen_height / 4, intersections[4]),
+    simIntersections = [SimIntersection(int(2 * screen_width / 6)-100, 1 * screen_height / 6, intersections[0]),
+                        SimIntersection(int(3 * screen_width / 6), 1 * screen_height / 6, intersections[1]),
+                        SimIntersection(int(4 * screen_width / 6)+100, 1 * screen_height / 6, intersections[2]),
+                        SimIntersection(int(1 * screen_width / 6)-150, 2 * screen_height / 4, intersections[3]),
+                        SimIntersection(int(2 * screen_width / 6)-100, 2 * screen_height / 4, intersections[4]),
                         SimIntersection(int(3 * screen_width / 6), 2 * screen_height / 4, intersections[5]),
-                        SimIntersection(int(4 * screen_width / 6), 2 * screen_height / 4, intersections[6]),
-                        SimIntersection(int(5 * screen_width / 6), 2 * screen_height / 4, intersections[7]),
-                        SimIntersection(int(2 * screen_width / 6), 3 * screen_height / 4, intersections[8]),
-                        SimIntersection(int(3 * screen_width / 6), 3 * screen_height / 4, intersections[9]),
-                        SimIntersection(int(4 * screen_width / 6), 3 * screen_height / 4, intersections[10])]
+                        SimIntersection(int(4 * screen_width / 6)+100, 2 * screen_height / 4, intersections[6]),
+                        SimIntersection(int(5 * screen_width / 6)+150, 2 * screen_height / 4, intersections[7]),
+                        SimIntersection(int(2 * screen_width / 6)-100, 5 * screen_height / 6, intersections[8]),
+                        SimIntersection(int(3 * screen_width / 6), 5 * screen_height / 6, intersections[9]),
+                        SimIntersection(int(4 * screen_width / 6)+100, 5 * screen_height / 6, intersections[10])]
 
     init_setup_blockPositions(streets)
 
@@ -315,53 +280,3 @@ def visualize_diamond(intersections, streets, states=None):
         print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
         a.append(car.idleTime)
     print(np.mean(a))
-
-
-#visualize_example()
-
-'''I1 = Intersection()
-I2 = Intersection()
-I3 = Intersection()
-I4 = Intersection()
-
-intersections = [I1, I2, I3, I4]
-
-streets = createMap(intersections)
-
-intersections = [I1, I2, I3, I4]
-
-cars = generateCars(streets)
-
-visualize(intersections, streets, cars)
-'''
-'''I1 = Intersection(name='1', N_connections=3)
-I2 = Intersection(name='2', N_connections=3)
-I3 = Intersection(name='3', N_connections=3)
-I4 = Intersection(name='4', N_connections=3)
-I5 = Intersection(name='5')
-
-#        I1 = Intersection(name='1', N_connections=4)
-#        I2 = Intersection(name='2', N_connections=4)
-#        I3 = Intersection(name='3', N_connections=4)
-#        I4 = Intersection(name='4', N_connections=4)
-
-
-# todo: intersections can be either with three connections (3-way-intersection) or with four connections (4-way-intersection).
-#  If both types exist, there has to be a multiple of four 3-way-intersections, otherwise not all the streets can be connected.
-#  -> implement try - error..
-
-streets = createMap([I1, I2, I3, I4, I5])
-
-intersections = [I1, I2, I3, I4, I5]
-nLength = len(intersections)
-
-cars = generateCars(streets, 200)
-visualize(intersections, streets, cars)
-
-a = []
-i = 0
-for car in cars:
-    i += 1
-    print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
-    a.append(car.idleTime)
-print(np.mean(np.array(a)))'''

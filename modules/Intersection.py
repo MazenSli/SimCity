@@ -224,8 +224,12 @@ class Intersection:
                 if direction == 'north':
                     if self.missing_dir is not 'south':
                         if self.intersectionEntranceBlocks['south'].car:  # opposite side has a car
-                            if self.intersectionEntranceBlocks[
-                                'south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                            if not ((self.intersectionEntranceBlocks['south'].car.nextTurn is 'left') or (self.intersectionEntranceBlocks['south'].nextBlock[self.intersectionEntranceBlocks['south'].car.nextTurn].car is not None)):  # car on opposite side goes straight or right -> we can't go
+                                iBlock.car.increment_idleTime()
+                                #print('I want to go left but my opposite goes straight 1')
+                                continue
+
+                            if self.intersectionEntranceBlocks['south'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
                                 #print('I want to go left but my opposite goes straight 1')
                                 continue
@@ -233,8 +237,7 @@ class Intersection:
                 elif direction == 'east':
                     if self.missing_dir is not 'west':
                         if self.intersectionEntranceBlocks['west'].car:  # opposite side has a car
-                            if self.intersectionEntranceBlocks[
-                                'west'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                            if not ((self.intersectionEntranceBlocks['west'].car.nextTurn is 'left') or (self.intersectionEntranceBlocks['west'].nextBlock[self.intersectionEntranceBlocks['west'].car.nextTurn].car is not None)):  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
                                 #print('I want to go left but my opposite goes straight 1')
                                 continue
@@ -242,8 +245,7 @@ class Intersection:
                 elif direction == 'south':
                     if self.missing_dir is not 'north':
                         if self.intersectionEntranceBlocks['north'].car:  # opposite side has a car
-                            if self.intersectionEntranceBlocks[
-                                'north'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                            if not ((self.intersectionEntranceBlocks['north'].car.nextTurn is 'left') or (self.intersectionEntranceBlocks['north'].nextBlock[self.intersectionEntranceBlocks['north'].car.nextTurn].car is not None)):  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
                                 #print('I want to go left but my opposite goes straight 1')
                                 continue
@@ -251,8 +253,7 @@ class Intersection:
                 elif direction == 'west':
                     if self.missing_dir is not 'east':
                         if self.intersectionEntranceBlocks['east'].car:  # opposite side has a car
-                            if self.intersectionEntranceBlocks[
-                                'east'].car.nextTurn is not 'left':  # car on opposite side goes straight or right -> we can't go
+                            if not ((self.intersectionEntranceBlocks['east'].car.nextTurn is 'left') or (self.intersectionEntranceBlocks['east'].nextBlock[self.intersectionEntranceBlocks['east'].car.nextTurn].car is not None)):  # car on opposite side goes straight or right -> we can't go
                                 iBlock.car.increment_idleTime()
                                 #print('I want to go left but my opposite goes straight 1')
                                 continue
