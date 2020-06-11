@@ -62,9 +62,10 @@ def main(argv=None):
 
         nLength = len(intersections)
 
+        N_cars = 600
+
         # todo: intersections can be either with three connections (3-way-intersection) or with four connections (4-way-intersection).
         #  If both types exist, there has to be a multiple of four 3-way-intersections, otherwise not all the streets can be connected.
-        #  -> implement try - error..
 
 #        streets = createExampleMap([I1, I2, I3, I4, I5])
 
@@ -76,7 +77,7 @@ def main(argv=None):
                     print(lane)
 
         # Get EV3 config params
-        cfg = EV3_Config('ea/my_params.cfg', nLength)
+        cfg = EV3_Config('ea/my_params.cfg', nLength, N_cars)
 
         # print config params
         print(cfg)

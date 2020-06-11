@@ -40,7 +40,7 @@ class EV3_Config:
                'minNorthGreenRatio': (float, False)}
 
     # constructor
-    def __init__(self, inFileName, nLength):
+    def __init__(self, inFileName, nLength, N_cars):
         # read YAML config and get EV3 section
         infile = open(inFileName, 'r')
         ymlcfg = yaml.safe_load(infile)
@@ -51,6 +51,7 @@ class EV3_Config:
 
         # number of traffic light parameters
         self.nLength = nLength
+        self.N_cars = N_cars
 
         # iterate over options
         for opt in self.options:
@@ -119,7 +120,6 @@ def ev3(cfg, intersections, streets):
     Population.crossoverFraction = cfg.crossoverFraction
 
     TrafficLightExp.A = cfg.trafficLightA
-    TrafficLightLin.A = cfg.trafficLightA
 
     MultivariateIndividual.nLength = cfg.nLength
     MultivariateIndividual.minIntersectionTime = cfg.minIntersectionTime
@@ -142,7 +142,7 @@ def ev3(cfg, intersections, streets):
     # create initial Population (random initialization)
     population = Population(cfg.populationSize)
 
-    cars = generateCars(streets, 600)
+    cars = generateCars(streets, cfg.N_cars)
     # evolution main loop
     X = np.arange(0, cfg.generationCount)
     bestFit = np.arange(0, cfg.generationCount)
@@ -150,9 +150,9 @@ def ev3(cfg, intersections, streets):
     Z = np.zeros((len(Y), len(X)))
 
     for i in range(cfg.generationCount):
-        simTime = 2000
+        simTime = 2000  # simTime determines how many time steps the simulation runs, this value should be
+                        # adjusted whenever the length of the streets is changed
         TrafficLightExp.simTime = simTime
-        TrafficLightLin.simTime = simTime
 
         for ind in population:
 

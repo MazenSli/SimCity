@@ -174,17 +174,14 @@ def run(simIntersections, streets, cars, window):
             # update
             time_counter += 1
             time_past = (time.perf_counter() - t0)
-            # update_physics(time_past)
             t0 = time.perf_counter()
-            if time_counter >= 2:
+            if time_counter >= 2:   # this factor regulates the "speed" of the visualization
                 # slower event...
                 a += 1
                 print(a)
                 if a >= 2000:
                     window.running = False
-                #for car in cars:
-                #    print('car position:', car.position, '   position of care hasCar? - ', car.position.car)
-                render(window, simIntersections, streets)  # this function is a hardcore bottleneck
+                render(window, simIntersections, streets)
                 for simInter in simIntersections:
                     simInter.intersection.process_intersection()
                 for car in cars:
@@ -208,9 +205,19 @@ def render(window, intersections, streets):
     game.display.flip()
 
 
-def visualize(intersections, streets, cars):
+# this visualization only works for traffic networks with exactly five intersections
+def visualize(intersections, streets, N_cars, states=None):
+    for street in streets:
+        for lane in street.lanes:
+            for block in lane.blocks:
+                block.remove_car()
+
+    cars = generateCars(streets, N_cars)
+
     screen_width = 1920
     screen_height = 1080
+
+    setLightParams(intersections, states)
 
     window = WindowWrapper()
 
@@ -225,74 +232,24 @@ def visualize(intersections, streets, cars):
 
     run(simIntersections, streets, cars, window)
 
-
-def visualize_example():
-    I1 = Intersection(name='10', N_connections=3, missing_dir='north')
-    I2 = Intersection(name='20', N_connections=3, missing_dir='north')
-    I3 = Intersection(name='30', N_connections=3, missing_dir='north')
-    I4 = Intersection(name='01', N_connections=3, missing_dir='west')
-    I5 = Intersection(name='11', N_connections=4)
-    I6 = Intersection(name='21', N_connections=4)
-    I7 = Intersection(name='31', N_connections=4)
-    I8 = Intersection(name='41', N_connections=3, missing_dir='east')
-    I9 = Intersection(name='12', N_connections=3, missing_dir='south')
-    I10 = Intersection(name='22', N_connections=3, missing_dir='south')
-    I11 = Intersection(name='32', N_connections=3, missing_dir='south')
-
-    intersection_matrix = []
-    col1 = [None, I4, None]
-    col2 = [I1, I5, I9]
-    col3 = [I2, I6, I10]
-    col4 = [I3, I7, I11]
-    col5 = [None, I8, None]
-
-    intersection_matrix.append(col1)
-    intersection_matrix.append(col2)
-    intersection_matrix.append(col3)
-    intersection_matrix.append(col4)
-    intersection_matrix.append(col5)
-
-    intersections = [I1, I2, I3, I4, I5, I6, I7, I8, I9, I10, I11]
-    streets = createExampleMap(intersections, intersection_matrix)
-    cars = generateCars(streets, 700)
-
-    screen_width = 1920
-    screen_height = 1080
-
-    window = WindowWrapper()
-    simIntersections = [SimIntersection(int(2 * screen_width / 6)-100, 1 * screen_height / 6, intersections[0]),
-                        SimIntersection(int(3 * screen_width / 6), 1 * screen_height / 6, intersections[1]),
-                        SimIntersection(int(4 * screen_width / 6)+100, 1 * screen_height / 6, intersections[2]),
-                        SimIntersection(int(1 * screen_width / 6)-150, 2 * screen_height / 4, intersections[3]),
-                        SimIntersection(int(2 * screen_width / 6)-100, 2 * screen_height / 4, intersections[4]),
-                        SimIntersection(int(3 * screen_width / 6), 2 * screen_height / 4, intersections[5]),
-                        SimIntersection(int(4 * screen_width / 6)+100, 2 * screen_height / 4, intersections[6]),
-                        SimIntersection(int(5 * screen_width / 6)+150, 2 * screen_height / 4, intersections[7]),
-                        SimIntersection(int(2 * screen_width / 6)-100, 5 * screen_height / 6, intersections[8]),
-                        SimIntersection(int(3 * screen_width / 6), 5 * screen_height / 6, intersections[9]),
-                        SimIntersection(int(4 * screen_width / 6)+100, 5 * screen_height / 6, intersections[10])]
-
-    init_setup_blockPositions(streets)
-
-    run(simIntersections, streets, cars, window)
-
     a = []
     i = 0
     for car in cars:
         i += 1
         print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
         a.append(car.idleTime)
-    print(np.mean(a))
+    print('average: ', np.mean(a))
 
 
-def visualize_diamond(intersections, streets, states=None):
+# this visualization works only for the "diamond shaped" example map
+def visualize_diamond(intersections, streets, N_cars, states=None):
 
     for street in streets:
         for lane in street.lanes:
             for block in lane.blocks:
                 block.remove_car()
 
-    cars = generateCars(streets, 600)
+    cars = generateCars(streets, N_cars)
 
     screen_width = 1920
     screen_height = 1080
@@ -323,53 +280,3 @@ def visualize_diamond(intersections, streets, states=None):
         print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
         a.append(car.idleTime)
     print(np.mean(a))
-
-
-#visualize_example()
-
-'''I1 = Intersection()
-I2 = Intersection()
-I3 = Intersection()
-I4 = Intersection()
-
-intersections = [I1, I2, I3, I4]
-
-streets = createMap(intersections)
-
-intersections = [I1, I2, I3, I4]
-
-cars = generateCars(streets)
-
-visualize(intersections, streets, cars)
-'''
-'''I1 = Intersection(name='1', N_connections=3)
-I2 = Intersection(name='2', N_connections=3)
-I3 = Intersection(name='3', N_connections=3)
-I4 = Intersection(name='4', N_connections=3)
-I5 = Intersection(name='5')
-
-#        I1 = Intersection(name='1', N_connections=4)
-#        I2 = Intersection(name='2', N_connections=4)
-#        I3 = Intersection(name='3', N_connections=4)
-#        I4 = Intersection(name='4', N_connections=4)
-
-
-# todo: intersections can be either with three connections (3-way-intersection) or with four connections (4-way-intersection).
-#  If both types exist, there has to be a multiple of four 3-way-intersections, otherwise not all the streets can be connected.
-#  -> implement try - error..
-
-streets = createMap([I1, I2, I3, I4, I5])
-
-intersections = [I1, I2, I3, I4, I5]
-nLength = len(intersections)
-
-cars = generateCars(streets, 200)
-visualize(intersections, streets, cars)
-
-a = []
-i = 0
-for car in cars:
-    i += 1
-    print('car', i, '~ ~ ~', 'idleTime: <> <>', car.idleTime)
-    a.append(car.idleTime)
-print(np.mean(np.array(a)))'''
