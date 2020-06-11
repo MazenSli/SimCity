@@ -16,6 +16,7 @@ import yaml
 
 from ea.Population import *
 from ea.Evaluator import *
+from mpl_toolkits.mplot3d import Axes3D
 
 from modules.MapFunctions import generateCars, simulateTraffic, setLightParams
 
@@ -119,7 +120,7 @@ def plotEv(X, Y, Z, bestFit):
     plt.show()
 
 
-def ev3(cfg, intersections, streets):
+def ev3(cfg, intersections, streets, simTime):
     """
     EV3
 
@@ -144,8 +145,6 @@ def ev3(cfg, intersections, streets):
     Individual.normprng = normprng
     Population.uniprng = uniprng
     Population.crossoverFraction = cfg.crossoverFraction
-
-    TrafficLightExp.A = cfg.trafficLightA
 
     MultivariateIndividual.nLength = cfg.nLength
     MultivariateIndividual.minIntersectionTime = cfg.minIntersectionTime
@@ -178,8 +177,6 @@ def ev3(cfg, intersections, streets):
 
     # evolution main loop
     for i in range(cfg.generationCount):
-        simTime = 2000  # simTime determines how many time steps the simulation runs, this value should be
-                        # adjusted whenever the length of the streets is changed
         TrafficLightExp.simTime = simTime
 
         for ind in population:
